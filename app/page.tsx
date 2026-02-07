@@ -1,17 +1,23 @@
-
-
+"use client";
+import Hero from "./components/Hero";
+import FeaturesSection, { Features } from "./components/Icons";
+import LearningJourney from "./components/LearningJourney"
+import StudentReview from "./components/StudentReview"
+import Navbar from "./components/Navbar";
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-100">
-      <div className="bg-white shadow-lg rounded-xl p-8">
-        <h1 className="text-3xl font-bold text-blue-600 mb-2">
-          BS Arena
-        </h1>
-        <p className="text-gray-600">
-          Next.js migration – Phase 1 complete
-        </p>
+    <>
+    <Navbar></Navbar>
+    <div className="min-h-screen bg-[rgb(255,250,246)]">
+      {/* Hero Section */}
+      <Hero />
+      {/* Features Section - marquee version */}
+      <div className="-mt-50 mb-20">
+<FeaturesSection />
       </div>
-    </main>
+ <LearningJourney></LearningJourney>
+    </div>
+    <StudentReview></StudentReview>
+    </>
   );
 }
-

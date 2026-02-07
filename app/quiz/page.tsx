@@ -291,11 +291,11 @@ export default function QuizPage() {
      🧠 QUIZ UI
      ===================================================== */
   return (
-    <div className="min-h-screen p-6 bg-gray-100">
+    <div className="min-h-screen p-6 bg-[rgb(255,250,246)]">
       {!betPlaced ? (
         <BetPanel onConfirm={startQuiz} />
       ) : (
-        <div className="bg-white p-6 rounded shadow">
+        <div>
           {remainingTime !== null && (
             <div className="mb-4 text-right text-sm font-semibold">
               {timeUpSubmitting ? (
@@ -314,24 +314,33 @@ export default function QuizPage() {
           )}
 
           {questions.map((q, i) => (
-            <div key={q.id} className="mb-6">
-              <p className="font-medium mb-2">
+            <div
+              key={q.id}
+              className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 mb-6"
+            >
+              <p className="font-semibold mb-3 text-gray-800">
                 {i + 1}. {q.question}
               </p>
 
-              {q.options.map((opt, idx) => (
-                <label key={idx} className="block">
-                  <input
-                    type="radio"
-                    checked={answers[q.id] === idx}
-                    disabled={remainingTime === 0 || submitting}
-                    onChange={() =>
-                      setAnswers({ ...answers, [q.id]: idx })
-                    }
-                  />{" "}
-                  {opt}
-                </label>
-              ))}
+              <div className="flex flex-col gap-3">
+                {q.options.map((opt, idx) => (
+                  <label
+                    key={idx}
+                    className="flex items-center gap-2 cursor-pointer text-gray-900"
+                  >
+                    <input
+                      type="radio"
+                      checked={answers[q.id] === idx}
+                      disabled={remainingTime === 0 || submitting}
+                      onChange={() =>
+                        setAnswers({ ...answers, [q.id]: idx })
+                      }
+                      className="accent-black w-4 h-4"
+                    />
+                    {opt}
+                  </label>
+                ))}
+              </div>
             </div>
           ))}
 
@@ -342,7 +351,7 @@ export default function QuizPage() {
               remainingTime === 0 ||
               Object.keys(answers).length !== questions.length
             }
-            className="bg-blue-600 text-white px-6 py-2 rounded disabled:opacity-50"
+            className="bg-black text-white px-6 py-3 rounded-xl shadow-md hover:bg-gray-900 disabled:opacity-50 transition-all duration-300"
           >
             Submit Quiz
           </button>

@@ -31,18 +31,16 @@ export default function LoginPage() {
         throw new Error(data.message || "Login failed");
       }
 
-      // ✅ Save auth state
       login(data.user, data.token);
       document.cookie = `token=${data.token}; path=/;`;
 
-      // ✅ Redirect
       router.push("/dashboard");
     } catch (err: unknown) {
-        if (err instanceof Error) {
-            setError(err.message);
-        } else {
-            setError("Something went wrong");
-        }
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -79,29 +77,87 @@ export default function LoginPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 mb-4 rounded"
+          className="w-full border p-2 mb-6 rounded"
           required
           disabled={loading}
         />
 
+        {/* ================= 3D LOGIN BUTTON ================= */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="btn relative rounded-full w-full"
         >
-          {loading ? "Logging in..." : "Login"}
+          <div className="btn__content flex items-center justify-center w-full">
+            {loading ? "Logging in..." : "Login"}
+          </div>
         </button>
 
         <p className="text-center mt-4 text-sm text-gray-600">
           Don&apos;t have an account?{" "}
-          <a
-            href="/register"
-            className="text-blue-600 hover:underline"
-          >
+          <a href="/register" className="text-blue-600 hover:underline">
             Register
           </a>
         </p>
       </form>
+
+      {/* ================= GLOBAL BUTTON CSS ================= */}
+      <style jsx global>{`
+        .btn {
+          text-decoration: none;
+          border-radius: 9999px;
+          position: relative;
+          white-space: nowrap;
+          width: 100%;
+          display: block;
+        }
+
+        .btn::before {
+          content: "";
+          position: absolute;
+          top: 6px;
+          left: 6px;
+          width: 100%;
+          height: 100%;
+          background-image: url("/IMAGE.png");
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          border: 2px solid black;
+          border-radius: inherit;
+          z-index: 0;
+          transition: 0.2s ease;
+        }
+
+        .btn__content {
+          position: relative;
+          z-index: 2;
+          background-color: #63cfbf;
+          border: 2px solid black;
+          border-radius: inherit;
+          height: 3.2rem;
+          font-size: 1rem;
+          font-weight: 500;
+          color: black;
+          transition: transform 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .btn:hover .btn__content {
+          transform: translate(6px, 6px);
+        }
+
+        .btn:hover::before {
+          opacity: 0;
+        }
+
+        .btn:disabled {
+          opacity: 0.6;
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 }

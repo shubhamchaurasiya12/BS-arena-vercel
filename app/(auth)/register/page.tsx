@@ -30,14 +30,13 @@ export default function RegisterPage() {
         throw new Error(data.message || "Registration failed");
       }
 
-      // ✅ Redirect to login
       router.push("/login");
     } catch (err: unknown) {
-        if (err instanceof Error) {
-            setError(err.message);
-        } else {
-            setError("Something went wrong");
-        }
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -54,7 +53,9 @@ export default function RegisterPage() {
         </h2>
 
         {error && (
-          <p className="text-red-600 mb-3 text-sm">{error}</p>
+          <div className="bg-red-50 border border-red-200 p-3 rounded mb-4">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
         )}
 
         <input
@@ -64,6 +65,7 @@ export default function RegisterPage() {
           onChange={(e) => setName(e.target.value)}
           className="w-full border p-2 mb-3 rounded"
           required
+          disabled={loading}
         />
 
         <input
@@ -73,6 +75,7 @@ export default function RegisterPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full border p-2 mb-3 rounded"
           required
+          disabled={loading}
         />
 
         <input
@@ -80,28 +83,87 @@ export default function RegisterPage() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 mb-4 rounded"
+          className="w-full border p-2 mb-6 rounded"
           required
+          disabled={loading}
         />
 
+        {/* ================= 3D REGISTER BUTTON ================= */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:opacity-50"
+          className="btn relative rounded-full w-full"
         >
-          {loading ? "Registering..." : "Register"}
+          <div className="btn__content flex items-center justify-center w-full">
+            {loading ? "Registering..." : "Register"}
+          </div>
         </button>
 
         <p className="text-center mt-4 text-sm text-gray-600">
           Already have an account?{" "}
-          <a
-            href="/login"
-            className="text-blue-600 hover:underline"
-          >
+          <a href="/login" className="text-blue-600 hover:underline">
             Login
           </a>
         </p>
       </form>
+
+      {/* ================= GLOBAL BUTTON CSS ================= */}
+      <style jsx global>{`
+        .btn {
+          text-decoration: none;
+          border-radius: 9999px;
+          position: relative;
+          white-space: nowrap;
+          width: 100%;
+          display: block;
+        }
+
+        .btn::before {
+          content: "";
+          position: absolute;
+          top: 6px;
+          left: 6px;
+          width: 100%;
+          height: 100%;
+          background-image: url("/IMAGE.png");
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+          border: 2px solid black;
+          border-radius: inherit;
+          z-index: 0;
+          transition: 0.2s ease;
+        }
+
+        .btn__content {
+          position: relative;
+          z-index: 2;
+          background-color: #63cfbf;
+          border: 2px solid black;
+          border-radius: inherit;
+          height: 3.2rem;
+          font-size: 1rem;
+          font-weight: 500;
+          color: black;
+          transition: transform 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .btn:hover .btn__content {
+          transform: translate(6px, 6px);
+        }
+
+        .btn:hover::before {
+          opacity: 0;
+        }
+
+        .btn:disabled {
+          opacity: 0.6;
+          pointer-events: none;
+        }
+      `}</style>
     </div>
   );
 }

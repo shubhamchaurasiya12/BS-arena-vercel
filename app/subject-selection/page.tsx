@@ -36,20 +36,11 @@ export default function SubjectSelectionPage() {
           throw new Error(data.message || "Unauthorized");
         }
 
-        const {
-          subjects,
-          selectedSubjectIds,
-        }: {
-          subjects: Subject[];
-          selectedSubjectIds: string[];
-        } = await res.json();
+        const { subjects, selectedSubjectIds } = await res.json();
 
         if (!cancelled) {
-          // ✅ hide already-added subjects (legacy behavior)
           setSubjects(
-            subjects.filter(
-              (s) => !selectedSubjectIds.includes(s.id)
-            )
+            subjects.filter((s: Subject) => !selectedSubjectIds.includes(s.id))
           );
         }
       } catch {
@@ -93,62 +84,90 @@ export default function SubjectSelectionPage() {
         throw new Error(data.message);
       }
 
-      // ✅ Go back to dashboard
       router.push("/dashboard");
       router.refresh();
     } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : "Failed to add subject"
-      );
+      setError(e instanceof Error ? e.message : "Failed to add subject");
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading subjects...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[rgb(255,250,246)] text-black">
+        Loading subjects...
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen p-6 bg-gray-100">
-      <h1 className="text-2xl font-bold mb-4">
-        Add a Subject
-      </h1>
+    <main className="min-h-screen -mt-8 -mb-3 bg-[rgb(255,250,246)] text-black">
 
-      {error && (
-        <div className="mb-4 text-red-600">
-          {error}
+      {/* ================= HEADER ================= */}
+      <header className="w-full py-10 text-center">
+        <h1 className="text-4xl md:text-5xl font-bold">
+          Select Your Subjects
+        </h1>
+        <p className="mt-2 text-lg text-gray-700">
+          Choose from the available subjects to start learning
+        </p>
+      </header>
+
+      {/* ================= HERO VIDEO ================= */}
+     {/* ================= HERO VIDEO ================= */}
+<div className="relative w-full h-[280px] md:h-[360px] overflow-hidden">
+
+  {/* Top fade line (left → center → right) */}
+  <div className="absolute top-0 left-0 w-full h-[0.8]
+    bg-gradient-to-r from-transparent via-black/40 to-transparent z-10">
+  </div>
+
+  {/* Hero video */}
+  <video
+    autoPlay
+    muted
+    loop
+    playsInline
+    className="w-full h-full object-cover"
+  >
+    <source src="/hero-video.mp4" type="video/mp4" />
+  </video>
+
+  {/* Bottom fade line (left → center → right) */}
+  <div className="absolute bottom-0 left-0 w-full h-[0.8] 
+    bg-gradient-to-r from-transparent via-black/40 to-transparent z-10">
+  </div>
+</div>
+      {/* ================= SUBJECT SECTION ================= */}
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-8 mt-8">
+          {subjects.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSelected(s.id)}
+              className={`p-5 rounded-xl border text-lg font-semibold transition-all duration-200
+                ${
+                  selected === s.id
+                    ? "bg-black text-white border-black scale-105 shadow-lg"
+                    : "bg-white border-gray-300 hover:shadow-md hover:bg-gray-50"
+                }
+              `}
+            >
+              {s.name}
+            </button>
+          ))}
         </div>
-      )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {subjects.map((s) => (
+        {/* ADD BUTTON */}
+        <div className="flex justify-center mb-10">
           <button
-            key={s.id}
-            type="button"
-            onClick={() => setSelected(s.id)}
-            className={`p-4 rounded border text-center transition ${
-              selected === s.id
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white hover:bg-gray-50"
-            }`}
+            onClick={addSubject}
+            disabled={!selected}
+            className="bg-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-900 disabled:opacity-40"
           >
-            {s.name}
+            Add Subject
           </button>
-        ))}
+        </div>
       </div>
-
-      <button
-        onClick={addSubject}
-        disabled={!selected}
-        className="bg-green-600 text-white px-6 py-2 rounded disabled:opacity-50"
-      >
-        Add Subject
-      </button>
     </main>
   );
 }

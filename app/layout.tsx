@@ -1,5 +1,6 @@
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import Navbar from "./components/Navbar";
 
 export const metadata = {
   title: "BS Arena",
@@ -13,8 +14,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-100 text-gray-900">
-        <AuthProvider>{children}</AuthProvider>
+      <body className="min-h-screen  text-gray-900">
+        <AuthProvider>
+          {/* Navbar always visible */}
+          {/* <Navbar /> */}
+
+          {/* Page content */}
+          <main className="pt-5">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );

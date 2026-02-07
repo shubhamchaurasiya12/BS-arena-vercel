@@ -1,3 +1,94 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Belle&display=swap');
+@import "tailwindcss";
+.Toastify__toast {
+  border-radius: 16px !important;
+  padding: 14px !important;
+}
+
+.Toastify__toast--success {
+  background: #ecfdf5 !important;
+  color: #065f46 !important;
+}
+
+.Toastify__toast--error {
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+}
+/* 3D Button Wrapper */
+.battle-btn {
+  display: inline-block;
+  text-decoration: none;
+  border-radius: 9999px;
+  position: relative;
+}
+
+/* 3D Shadow Layer */
+.battle-btn::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 100%;
+  height: 100%;
+
+  background-image: url("/IMAGE.png");
+  /* put image in public folder */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  border: 2px solid black;
+  border-radius: inherit;
+
+  z-index: 0;
+  transition: 0.2s ease;
+}
+
+/* Main Button Layer */
+.battle-btn__content {
+  position: relative;
+  z-index: 2;
+
+  background-color: #63cfbf;
+  border: 2px solid black;
+  border-radius: inherit;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 2rem;
+  min-width: 280px;
+  height: 4.6rem;
+
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: black;
+
+  transition: transform 0.2s ease;
+}
+
+/* Hover Effects */
+.battle-btn:hover .battle-btn__content {
+  transform: translate(6px, 6px);
+}
+
+.battle-btn:hover::before {
+  opacity: 0;
+}
+body {
+  background-color: rgb(255,250,246);
+  /* or whatever your page bg is */
+}
+html,
+body {
+  background-color: rgb(255, 250, 246);
+  min-height: 100%;
+}
+@font-face {
+  font-family: 'PPE';
+  src: url('/fonts/PPE-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
