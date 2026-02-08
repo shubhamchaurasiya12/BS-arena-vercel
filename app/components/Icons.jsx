@@ -30,7 +30,7 @@ export default function FeaturesSection() {
       </div>
 
       {/* Section title */}
-      <h2 className="text-3xl font-bold text-black mb-2 text-center">
+      <h2 className="text-3xl font-bold text-black mb-2 text-center ppe-header">
         Our Features
       </h2>
 
@@ -51,19 +51,40 @@ export default function FeaturesSection() {
               <div className="text-4xl text-gray-800 flex items-center justify-center">
                 {feature.icon}
               </div>
-              <p className="text-center text-black font-medium text-sm break-words">
+              <p className="text-center text-black font-medium text-sm break-words ppe-text">
                 {feature.name}
               </p>
             </div>
           ))}
         </div>
       </div>
+
       {/* Bottom line with fade */}
       <div className="mt-15 relative mt-2 mb-10 h-[2px] w-full">
         <div className="absolute left-0 top-0 h-full w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
       </div>
+
       {/* CSS */}
       <style jsx>{`
+        @font-face {
+          font-family: "PPE";
+          src: url("/fonts/PPE.woff2") format("woff2");
+          font-weight: 400;
+          font-style: normal;
+        }
+
+        .ppe-header {
+          font-family: "PPE";
+          font-weight: 400;
+          color: rgb(0, 0, 0);
+        }
+
+        .ppe-text {
+          font-family: "PPE";
+          font-weight: 400;
+          color: rgb(0, 0, 0);
+        }
+
         .marquee {
           display: inline-flex;
           animation: scroll 20s linear infinite;

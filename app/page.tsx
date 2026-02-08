@@ -4,6 +4,7 @@ import FeaturesSection, { Features } from "./components/Icons";
 import LearningJourney from "./components/LearningJourney"
 import StudentReview from "./components/StudentReview"
 import Navbar from "./components/Navbar";
+import QuestionJar from "./components/QuestionJar";
 export default function Home() {
   return (
     <>
@@ -18,6 +19,8 @@ export default function Home() {
  <LearningJourney></LearningJourney>
     </div>
     <StudentReview></StudentReview>
+    <QuestionJar></QuestionJar>
+    
     </>
   );
 }

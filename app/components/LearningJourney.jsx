@@ -19,11 +19,11 @@ export default function LearningJourney() {
       {/* Main Content Section with left and right margin */}
       <div className="relative bg-white mx-6 lg:mx-20 py-20 flex flex-col lg:flex-row items-center gap-10 rounded-xl shadow-xl">
         {/* Left Side - Heading + Paragraph */}
-        <div className=" p-8 flex-1 max-w-xl">
-          <h2 className="text-4xl lg:text-5xl font-bold text-black mb-6">
+        <div className="p-8 flex-1 max-w-xl">
+          <h2 className="text-4xl lg:text-5xl font-bold text-black mb-6 ppe-header">
             Navigate Your Learning Journey with Confidence
           </h2>
-          <p className="text-lg lg:text-xl text-gray-800 leading-relaxed">
+          <p className="text-lg lg:text-xl text-gray-800 leading-relaxed ppe-text">
             Every student’s path to mastering a subject is unique. Each topic,
             assignment, and quiz is just one of many steps on your personal
             learning roadmap. Sometimes it can feel overwhelming — it’s okay to
@@ -46,6 +46,28 @@ export default function LearningJourney() {
           />
         </div>
       </div>
+
+      {/* PPE Font CSS */}
+      <style jsx>{`
+        @font-face {
+          font-family: "PPE";
+          src: url("/fonts/PPE.woff2") format("woff2");
+          font-weight: 400;
+          font-style: normal;
+        }
+
+        .ppe-header {
+          font-family: "PPE";
+          font-weight: 400;
+          color: rgb(0, 0, 0);
+        }
+
+        .ppe-text {
+          font-family: "PPE";
+          font-weight: 400;
+          color: rgb(0, 0, 0);
+        }
+      `}</style>
     </section>
   );
 }

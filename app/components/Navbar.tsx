@@ -1,8 +1,82 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import HoverTab from "./HoverTab"; // Make sure this path is correct
 
-const navItems = ["Home", "About", "Programs", "Contact"];
+// Define your hover items
+const hoverItems = [
+  {
+    name: "Home",
+    content: "Welcome to our homepage with all the latest updates and news."
+  },
+  {
+    name: "About",
+    content: "Learn about our mission, vision, and the team behind our success."
+  },
+{
+  name: "Features",
+  content: (
+    <div className="flex-1 relative p-6">
+      {/* Decorative vertical notebook line */}
+      {/* <div className="absolute top-0 left-6 bottom-0 w-[2px] bg-black"></div> */}
+
+      <div className="flex flex-col gap-4">
+        <div className="text-gray-800 font-semibold border-b border-black pb-1">
+          AI Notes
+        </div>
+        <div className="text-gray-800 font-semibold border-b border-black pb-1">
+          Weekly Quizzes
+        </div>
+        <div className="text-gray-800 font-semibold border-b border-black pb-1">
+          Leaderboard
+        </div>
+        <div className="text-gray-800 font-semibold border-b border-black pb-1">
+          Pomodoro
+        </div>
+        <div className="text-gray-800 font-semibold border-b border-black pb-1">
+          Todo App
+        </div>
+        <div className="text-gray-800 font-semibold border-b border-black pb-1">
+          Grades Calculator App
+        </div>
+        <div className="text-gray-800 font-semibold border-b border-black pb-1">
+          Grades Predictor App
+        </div>
+      </div>
+    </div>
+  )
+},
+{
+  name: "Devlopers",
+  content: (
+    <div className="flex gap-8 items-start">
+      {/* Left side: Notebook-style titles */}
+      <div className="flex-1 relative  p-6 ">
+        {/* Decorative notebook margin line */}
+        {/* <div className="absolute top-0 left-6 bottom-0 w-[2px] bg-red-500"></div> */}
+
+        <div className="flex flex-col gap-4 pl-10">
+          <div className="text-xl font-bold border-b border-black pb-1">
+            Backend Developer
+          </div>
+          <div className="text-xl font-bold border-b border-black pb-1">
+            Frontend Developer
+          </div>
+        </div>
+      </div>
+
+      {/* Right side: Image */}
+      <div className="w-48 flex-shrink-0">
+        <img
+          src="/image copy.png"
+          alt="Team Illustration"
+          className="w-full h-auto rounded-xl shadow-lg"
+        />
+      </div>
+    </div>
+  )
+}
+];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -16,31 +90,42 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
 
     /* ================= NAV LETTER EFFECT ================= */
-    document.querySelectorAll(".nav-link").forEach((link) => {
-      const text = link.getAttribute("data-text") || "";
-      link.innerHTML = "";
+    const initNavLinks = () => {
+      document.querySelectorAll(".nav-link").forEach((link) => {
+        // Only process if it hasn't been processed yet
+        if (link.children.length === 0) {
+          const text = link.textContent || "";
+          link.innerHTML = ""; // Clear existing content
 
-      text.split("").forEach((letter, index) => {
-        const span = document.createElement("span");
-        span.textContent = letter;
-        span.setAttribute("data-letter", letter);
-        span.style.setProperty("--i", String(index));
-        link.appendChild(span);
+          text.split("").forEach((letter, index) => {
+            const span = document.createElement("span");
+            span.textContent = letter;
+            span.setAttribute("data-letter", letter);
+            span.style.setProperty("--i", String(index));
+            link.appendChild(span);
+          });
+        }
       });
-    });
+    };
+
+    // Initialize nav links after a small delay to ensure DOM is ready
+    setTimeout(initNavLinks, 10);
 
     /* ================= MAGNETIC LOGO EFFECT ================= */
     const logo = document.querySelector(".logo-magnetic");
 
-    const handleMove = (e) => {
+    const handleMove = (e: MouseEvent) => {
+      if (!logo) return;
       const rect = logo.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
-      logo.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+      (logo as HTMLElement).style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
     };
 
     const handleLeave = () => {
-      logo.style.transform = "translate(0, 0)";
+      if (logo) {
+        (logo as HTMLElement).style.transform = "translate(0, 0)";
+      }
     };
 
     if (logo) {
@@ -70,27 +155,20 @@ export default function Navbar() {
             <img src="/logo.png" alt="Logo" className="logo-img h-10 w-auto" />
           </a>
 
-          {/* DESKTOP NAV */}
-          <nav className="hidden lg:flex gap-[45px] flex-1 justify-end">
-            {navItems.map((item) => (
-              <a
-                key={item}
-                href="#"
-                data-text={item}
-                className="nav-link text-black text-[16px] font-medium inline-block overflow-hidden whitespace-nowrap"
-              />
-            ))}
-          </nav>
+          {/* DESKTOP NAV - INTEGRATED WITH HOVER TAB */}
+          <div className="hidden lg:flex flex-1 justify-end">
+            <HoverTab items={hoverItems} />
+          </div>
 
           {/* DESKTOP BUTTONS */}
           <div className="hidden lg:flex items-center gap-6">
-            <a href="#" className="btn relative rounded-full">
+            <a href="/login" className="btn relative rounded-full">
               <div className="btn__content">
                 Dive in Battle <span className="btn__icon">→</span>
               </div>
             </a>
 
-            <a href="#" className="btn btn--icon relative rounded-full">
+            <a href="#question-jar" className="btn btn--icon relative rounded-full">
               <div className="btn__content btn__content--icon">?</div>
             </a>
           </div>
@@ -111,14 +189,14 @@ export default function Navbar() {
         {open && (
           <div className="lg:hidden mt-4 rounded-2xl border-2 border-black p-6 space-y-6 bg-white">
             <nav className="flex flex-col gap-4">
-              {navItems.map((item) => (
+              {hoverItems.map((item) => (
                 <a
-                  key={item}
+                  key={item.name}
                   href="#"
                   className="text-black text-lg font-medium"
                   onClick={() => setOpen(false)}
                 >
-                  {item}
+                  {item.name}
                 </a>
               ))}
             </nav>
@@ -130,7 +208,7 @@ export default function Navbar() {
                 </div>
               </a>
 
-              <a href="#" className="btn btn--icon relative rounded-full">
+              <a href="#question-jar" className="btn btn--icon relative rounded-full">
                 <div className="btn__content btn__content--icon">?</div>
               </a>
             </div>
@@ -151,27 +229,7 @@ export default function Navbar() {
           border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         }
 
-        .nav-link span {
-          display: inline-block;
-          position: relative;
-          transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
-          transition-delay: calc(var(--i) * 0.05s);
-        }
-
-        .nav-link span::before {
-          content: attr(data-letter);
-          position: absolute;
-          top: 100%;
-          left: 0;
-          font-family: "C", cursive;
-          font-size: 18px;
-          font-weight: 600;
-        }
-
-        .nav-link:hover span {
-          transform: translateY(-100%);
-        }
-
+        /* Remove the old nav-link styles since HoverTab handles it */
         .logo-magnetic {
           transition: transform 0.2s ease-out;
           will-change: transform;

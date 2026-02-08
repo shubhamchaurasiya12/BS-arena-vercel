@@ -1,30 +1,18 @@
-import { getServerSession } from "next-auth";
+// app/api/auth/[...nextauth]/route.ts
+
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { supabase } from "@/lib/supabase";
-import type { NextAuthOptions } from "next-auth";
 
-declare module "next-auth" {
-  interface User {
-    id?: string;
-    points?: number;
-  }
-
-  interface Session {
-    user: User & {
-      id?: string;
-      points?: number;
-    };
-  }
-}
-
-// ================= NEXTAUTH OPTIONS =================
-export const authOptions: NextAuthOptions = {
+// ✅ NextAuth Config
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
@@ -32,13 +20,17 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async signIn({ user }) {
+    // ✅ Runs when user logs in
+    async signIn({ user }: any) {
+      if (!user?.email) return false;
+
       const { data } = await supabase
         .from("users")
         .select("*")
         .eq("email", user.email)
         .single();
 
+      // Create user if not exists
       if (!data) {
         await supabase.from("users").insert({
           id: crypto.randomUUID(),
@@ -52,7 +44,10 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
 
-    async session({ session }) {
+    // ✅ Attach DB user info to session
+    async session({ session }: any) {
+      if (!session?.user?.email) return session;
+
       const { data } = await supabase
         .from("users")
         .select("*")
@@ -61,7 +56,8 @@ export const authOptions: NextAuthOptions = {
 
       if (data) {
         session.user.id = data.id;
-        session.user.points = data.total_points;
+        session.user.total_points = data.total_points;
+        session.user.active_subject_count = data.active_subject_count;
       }
 
       return session;
@@ -77,15 +73,6 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-// ================= VERIFY TOKEN (LEGACY COMPAT) =================
-export async function verifyToken() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  return {
-    userId: session.user.id,
-  };
-}
+// ✅ NextAuth Handler
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
