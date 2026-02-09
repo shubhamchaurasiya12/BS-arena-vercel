@@ -1,34 +1,30 @@
-import { NextRequest, NextResponse } from "next/server";
+// app/api/subjects/all/route.ts
+
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { supabase } from "@/lib/supabase";
-import { verifyToken } from "@/lib/auth";
 
-type JwtPayload = { userId: string };
+export async function GET() {
+  // 🔐 Auth (NextAuth session)
+  const session = await getServerSession(authOptions);
 
-export async function GET(req: NextRequest) {
-  // 1️⃣ Auth
-  const authHeader = req.headers.get("authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json(
-      { message: "Unauthorized" },
-      { status: 401 }
-    );
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const token = authHeader.slice(7);
-  verifyToken<JwtPayload>(token); // we only need to verify
-
-  // 2️⃣ Fetch all subjects
+  // 📘 Fetch all subjects
   const { data, error } = await supabase
     .from("subjects")
     .select("id, name");
 
   if (error) {
+    console.error("Subjects all API error:", error);
     return NextResponse.json(
-      { message: error.message },
+      { message: "Failed to fetch subjects" },
       { status: 500 }
     );
   }
 
-  return NextResponse.json(data || []);
+  return NextResponse.json(data ?? []);
 }

@@ -1,18 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
-import { verifyToken } from "@/lib/auth";
+// app/api/quiz/meta/route.ts
 
-type JwtPayload = { userId: string };
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { supabase } from "@/lib/supabase";
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
+    // 🔐 Auth (NextAuth)
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    verifyToken<JwtPayload>(authHeader.slice(7));
-
+    // 📌 Params
     const { searchParams } = new URL(req.url);
     const subjectId = searchParams.get("subjectId");
     const week = searchParams.get("week");
@@ -24,12 +26,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // 🔎 Fetch quiz meta
     const { data: quiz, error } = await supabase
       .from("quizzes")
       .select("id")
       .eq("subject_id", subjectId)
       .eq("week", week)
-      .single();
+      .maybeSingle();
 
     if (error || !quiz) {
       return NextResponse.json(
@@ -39,7 +42,8 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({ quizId: quiz.id });
-  } catch {
+  } catch (err) {
+    console.error("Quiz meta error:", err);
     return NextResponse.json(
       { message: "Failed to fetch quiz meta" },
       { status: 500 }

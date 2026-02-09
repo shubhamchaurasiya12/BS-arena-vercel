@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
-import { getQuizResult } from "@/lib/quiz.service";
+// app/api/quiz/result/[attemptId]/route.ts
 
-type JwtPayload = {
-  userId: string;
-};
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getQuizResult } from "@/lib/quiz.service";
 
 type ServiceError = {
   message?: string;
@@ -12,23 +11,20 @@ type ServiceError = {
 };
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   context: { params: Promise<{ attemptId: string }> }
 ) {
   try {
-    /* 🔐 Auth */
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+    // 🔐 Auth (NextAuth)
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const token = authHeader.slice(7);
-    const { userId } = verifyToken<JwtPayload>(token);
+    const userId = session.user.id;
 
-    /* 📌 Params — MUST be awaited in Next.js 15 */
+    // 📌 Params
     const { attemptId } = await context.params;
 
     if (!attemptId || typeof attemptId !== "string") {
@@ -38,7 +34,7 @@ export async function GET(
       );
     }
 
-    /* 📊 Fetch result */
+    // 📊 Fetch result
     const result = await getQuizResult({ userId, attemptId });
 
     return NextResponse.json(result);

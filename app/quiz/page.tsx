@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import BetPanel from "@/components/BetPanel";
-import { useAuth } from "@/context/AuthContext";
 
 type Question = {
   id: string;
@@ -14,7 +13,6 @@ type Question = {
 export default function QuizPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { token, user, setUser } = useAuth();
 
   const subjectId = searchParams.get("subjectId");
   const week = searchParams.get("week");
@@ -32,44 +30,38 @@ export default function QuizPage() {
   const [timeUpSubmitting, setTimeUpSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Prevent double auto-submit
+  // prevent duplicate submits
   const autoSubmitRef = useRef(false);
+  const tabSwitchLock = useRef(false);
 
   /* =====================================================
-     🔁 RECOVER EXISTING ATTEMPT (RUNS FIRST)
+     🔁 RECOVER EXISTING ATTEMPT
      ===================================================== */
   useEffect(() => {
-    if (!token) {
-      setInitializing(false);
-      return;
-    }
-
     const savedAttemptId = localStorage.getItem("quizAttemptId");
     if (!savedAttemptId) {
       setInitializing(false);
       return;
     }
 
-    async function recoverAttempt() {
+    async function recover() {
       try {
         const res = await fetch(`/api/quiz/attempt/${savedAttemptId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         });
 
         if (!res.ok) throw new Error();
 
         const data = await res.json();
-
         setAttemptId(data.attemptId);
         setQuestions(data.questions);
         setRemainingTime(data.quiz.remainingTime);
         setBetPlaced(true);
 
-        const storedAnswers = localStorage.getItem(
+        const stored = localStorage.getItem(
           `quiz_answers_${savedAttemptId}`
         );
-
-        setAnswers(storedAnswers ? JSON.parse(storedAnswers) : {});
+        setAnswers(stored ? JSON.parse(stored) : {});
       } catch {
         localStorage.removeItem("quizAttemptId");
         localStorage.removeItem(`quiz_answers_${savedAttemptId}`);
@@ -78,40 +70,29 @@ export default function QuizPage() {
       }
     }
 
-    recoverAttempt();
-  }, [token]);
+    recover();
+  }, []);
 
   /* =====================================================
-     📌 FETCH QUIZ META (ONLY IF NO ACTIVE ATTEMPT)
+     📌 FETCH QUIZ META
      ===================================================== */
   useEffect(() => {
-    if (initializing) return;
-    if (attemptId) return;
-    if (!token || !subjectId || !week) return;
+    if (initializing || attemptId || !subjectId || !week) return;
 
     async function fetchMeta() {
       try {
         setLoading(true);
-
         const res = await fetch(
           `/api/quiz/meta?subjectId=${subjectId}&week=${week}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { credentials: "include" }
         );
 
         const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(
-            data?.message || "No quiz available right now"
-          );
-        }
-
+        if (!res.ok) throw new Error(data.message);
         setQuizId(data.quizId);
-      } catch (err) {
+      } catch (e) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "No quiz available right now"
+          e instanceof Error ? e.message : "No quiz available"
         );
       } finally {
         setLoading(false);
@@ -119,7 +100,7 @@ export default function QuizPage() {
     }
 
     fetchMeta();
-  }, [initializing, attemptId, token, subjectId, week]);
+  }, [initializing, attemptId, subjectId, week]);
 
   /* =====================================================
      💾 AUTO-SAVE ANSWERS
@@ -137,45 +118,29 @@ export default function QuizPage() {
      ▶️ START QUIZ
      ===================================================== */
   async function startQuiz(bet: number) {
-    if (!quizId || !token || !user) return;
+    if (!quizId) return;
 
     try {
       setLoading(true);
 
       const res = await fetch("/api/quiz/start", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ quizId, bet }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.message || "Failed to start quiz");
-      }
+      if (!res.ok) throw new Error(data.message);
 
       setAttemptId(data.attemptId);
       setQuestions(data.questions);
       setRemainingTime(data.quiz.timeLimit);
       setBetPlaced(true);
 
-      // 🔥 Real-time points update
-      const updatedUser = {
-        ...user,
-        total_points: user.total_points - bet,
-      };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-
       localStorage.setItem("quizAttemptId", data.attemptId);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to start quiz"
-      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to start quiz");
     } finally {
       setLoading(false);
     }
@@ -187,67 +152,95 @@ export default function QuizPage() {
   useEffect(() => {
     if (remainingTime === null) return;
 
-    const timer = setInterval(() => {
-      setRemainingTime((t) =>
-        t !== null ? Math.max(t - 1, 0) : null
-      );
+    const t = setInterval(() => {
+      setRemainingTime((v) => (v ? Math.max(v - 1, 0) : 0));
     }, 1000);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(t);
   }, [remainingTime]);
 
   /* =====================================================
-     ⏰ AUTO-SUBMIT WHEN TIME = 0 (BACKEND VALIDATED)
+     ⏰ AUTO-SUBMIT ON TIME UP
      ===================================================== */
   useEffect(() => {
     if (
       remainingTime === 0 &&
       attemptId &&
-      token &&
       !autoSubmitRef.current
     ) {
       autoSubmitRef.current = true;
       setTimeUpSubmitting(true);
-      (async () => {
-        await submitQuiz(true);
-      })();
+      submitQuiz(true);
     }
-  }, [remainingTime, attemptId, token]);
+  }, [remainingTime, attemptId]);
 
   /* =====================================================
-     ⏱ FORMAT TIME
+     🚨 TAB SWITCH DETECTION
      ===================================================== */
-  function formatTime(seconds: number) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  }
+  useEffect(() => {
+    if (!attemptId) return;
+
+    async function onVisibilityChange() {
+      if (document.visibilityState !== "hidden") return;
+      if (tabSwitchLock.current) return;
+
+      tabSwitchLock.current = true;
+
+      try {
+        const res = await fetch("/api/quiz/tab-switch", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ attemptId }),
+        });
+
+        const data = await res.json();
+
+        if (data?.warning) {
+          alert(data.message);
+        }
+
+        if (data?.status === "FAILED_CHEATING") {
+          alert("❌ Quiz auto-submitted due to tab switching");
+          autoSubmitRef.current = true;
+          setTimeUpSubmitting(true);
+          await submitQuiz(true);
+        }
+      } finally {
+        setTimeout(() => {
+          tabSwitchLock.current = false;
+        }, 1000);
+      }
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () =>
+      document.removeEventListener(
+        "visibilitychange",
+        onVisibilityChange
+      );
+  }, [attemptId]);
 
   /* =====================================================
      📤 SUBMIT QUIZ
      ===================================================== */
   async function submitQuiz(isAuto = false) {
-    if (!attemptId || !token) return;
-    if (submitting && !isAuto) return;
+    if (!attemptId || (submitting && !isAuto)) return;
 
     try {
       setSubmitting(true);
 
       await fetch("/api/quiz/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ attemptId, answers }),
       });
 
       await fetch("/api/quiz/apply-points", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ attemptId }),
       });
 
@@ -263,7 +256,7 @@ export default function QuizPage() {
   }
 
   /* =====================================================
-     🔒 GUARDS
+     🧠 UI
      ===================================================== */
   if (!subjectId || !week) {
     return <p className="p-6 text-red-600">Invalid quiz link</p>;
@@ -276,71 +269,51 @@ export default function QuizPage() {
   if (error && !betPlaced) {
     return (
       <div className="p-6 text-center">
-        <p className="text-gray-700">{error}</p>
+        <p>{error}</p>
         <button
-          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
           onClick={() => router.push("/dashboard")}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
         >
-          Back to Dashboard
+          Back
         </button>
       </div>
     );
   }
 
-  /* =====================================================
-     🧠 QUIZ UI
-     ===================================================== */
   return (
     <div className="min-h-screen p-6 bg-[rgb(255,250,246)]">
       {!betPlaced ? (
         <BetPanel onConfirm={startQuiz} />
       ) : (
-        <div>
+        <>
           {remainingTime !== null && (
-            <div className="mb-4 text-right text-sm font-semibold">
-              {timeUpSubmitting ? (
-                <span className="text-red-600">
-                  Time’s up! Submitting…
-                </span>
-              ) : (
-                <>
-                  Time Left:{" "}
-                  <span className="text-red-600">
-                    {formatTime(remainingTime)}
-                  </span>
-                </>
-              )}
+            <div className="mb-4 text-right font-semibold">
+              {timeUpSubmitting
+                ? "Submitting…"
+                : `Time Left: ${remainingTime}s`}
             </div>
           )}
 
           {questions.map((q, i) => (
             <div
               key={q.id}
-              className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 mb-6"
+              className="bg-white p-6 rounded-xl mb-6"
             >
-              <p className="font-semibold mb-3 text-gray-800">
+              <p className="font-semibold mb-2">
                 {i + 1}. {q.question}
               </p>
-
-              <div className="flex flex-col gap-3">
-                {q.options.map((opt, idx) => (
-                  <label
-                    key={idx}
-                    className="flex items-center gap-2 cursor-pointer text-gray-900"
-                  >
-                    <input
-                      type="radio"
-                      checked={answers[q.id] === idx}
-                      disabled={remainingTime === 0 || submitting}
-                      onChange={() =>
-                        setAnswers({ ...answers, [q.id]: idx })
-                      }
-                      className="accent-black w-4 h-4"
-                    />
-                    {opt}
-                  </label>
-                ))}
-              </div>
+              {q.options.map((opt, idx) => (
+                <label key={idx} className="block">
+                  <input
+                    type="radio"
+                    checked={answers[q.id] === idx}
+                    onChange={() =>
+                      setAnswers({ ...answers, [q.id]: idx })
+                    }
+                  />{" "}
+                  {opt}
+                </label>
+              ))}
             </div>
           ))}
 
@@ -351,11 +324,11 @@ export default function QuizPage() {
               remainingTime === 0 ||
               Object.keys(answers).length !== questions.length
             }
-            className="bg-black text-white px-6 py-3 rounded-xl shadow-md hover:bg-gray-900 disabled:opacity-50 transition-all duration-300"
+            className="bg-black text-white px-6 py-3 rounded-xl"
           >
             Submit Quiz
           </button>
-        </div>
+        </>
       )}
     </div>
   );

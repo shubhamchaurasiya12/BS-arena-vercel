@@ -20,31 +20,31 @@ export default function SubjectSelectionPage() {
 
     async function loadSubjects() {
       try {
-        const token = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("token="))
-          ?.split("=")[1];
-
-        if (!token) throw new Error("Not authenticated");
-
+        // ✅ NextAuth: cookies are sent automatically
         const res = await fetch("/api/subjects", {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         });
 
         if (!res.ok) {
           const data = await res.json();
-          throw new Error(data.message || "Unauthorized");
+          throw new Error(data.message || "Failed to load subjects");
         }
 
         const { subjects, selectedSubjectIds } = await res.json();
 
         if (!cancelled) {
           setSubjects(
-            subjects.filter((s: Subject) => !selectedSubjectIds.includes(s.id))
+            subjects.filter(
+              (s: Subject) => !selectedSubjectIds.includes(s.id)
+            )
           );
         }
-      } catch {
-        if (!cancelled) setError("Failed to load subjects");
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load subjects"
+          );
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -60,22 +60,10 @@ export default function SubjectSelectionPage() {
     if (!selected) return;
 
     try {
-      const token = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("token="))
-        ?.split("=")[1];
-
-      if (!token) {
-        setError("Not authenticated");
-        return;
-      }
-
       const res = await fetch("/api/subjects/add", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ subjectId: selected }),
       });
 
@@ -101,7 +89,6 @@ export default function SubjectSelectionPage() {
 
   return (
     <main className="min-h-screen -mt-8 -mb-3 bg-[rgb(255,250,246)] text-black">
-
       {/* ================= HEADER ================= */}
       <header className="w-full py-10 text-center">
         <h1 className="text-4xl md:text-5xl font-bold">
@@ -113,32 +100,32 @@ export default function SubjectSelectionPage() {
       </header>
 
       {/* ================= HERO VIDEO ================= */}
-     {/* ================= HERO VIDEO ================= */}
-<div className="relative w-full h-[280px] md:h-[360px] overflow-hidden">
+      <div className="relative w-full h-[280px] md:h-[360px] overflow-hidden">
+        {/* Top fade line */}
+        <div className="absolute top-0 left-0 w-full h-[0.8px]
+          bg-gradient-to-r from-transparent via-black/40 to-transparent z-10" />
 
-  {/* Top fade line (left → center → right) */}
-  <div className="absolute top-0 left-0 w-full h-[0.8]
-    bg-gradient-to-r from-transparent via-black/40 to-transparent z-10">
-  </div>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
 
-  {/* Hero video */}
-  <video
-    autoPlay
-    muted
-    loop
-    playsInline
-    className="w-full h-full object-cover"
-  >
-    <source src="/hero-video.mp4" type="video/mp4" />
-  </video>
+        {/* Bottom fade line */}
+        <div className="absolute bottom-0 left-0 w-full h-[0.8px]
+          bg-gradient-to-r from-transparent via-black/40 to-transparent z-10" />
+      </div>
 
-  {/* Bottom fade line (left → center → right) */}
-  <div className="absolute bottom-0 left-0 w-full h-[0.8] 
-    bg-gradient-to-r from-transparent via-black/40 to-transparent z-10">
-  </div>
-</div>
       {/* ================= SUBJECT SECTION ================= */}
       <div className="max-w-6xl mx-auto p-6">
+        {error && (
+          <p className="text-red-600 text-center mb-4">{error}</p>
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-8 mt-8">
           {subjects.map((s) => (
             <button

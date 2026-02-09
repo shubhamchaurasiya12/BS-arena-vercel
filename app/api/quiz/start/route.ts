@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
-import { startQuizAttempt } from "@/lib/quiz.service";
+// app/api/quiz/start/route.ts
 
-type JwtPayload = {
-  userId: string;
-};
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { startQuizAttempt } from "@/lib/quiz.service";
 
 type ServiceError = {
   message?: string;
@@ -13,19 +12,16 @@ type ServiceError = {
 
 export async function POST(req: NextRequest) {
   try {
-    /* 🔐 Auth */
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+    // 🔐 Auth (NextAuth)
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const token = authHeader.slice(7);
-    const { userId } = verifyToken<JwtPayload>(token);
+    const userId = session.user.id;
 
-    /* 📦 Payload */
+    // 📦 Payload
     const body = await req.json();
     const quizId: unknown = body.quizId;
     const bet: unknown = body.bet;
@@ -37,7 +33,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    /* ▶️ Start quiz (SERVICE LAYER) */
+    // ▶️ Start quiz
     const result = await startQuizAttempt({
       userId,
       quizId,

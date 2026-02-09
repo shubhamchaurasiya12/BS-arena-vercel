@@ -1,23 +1,22 @@
+// app/api/subjects/select/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { supabase } from "@/lib/supabase";
-import { verifyToken } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 
-type JwtPayload = { userId: string };
-
 export async function POST(req: NextRequest) {
+  // 🔐 Auth
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const userId = session.user.id;
+
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.slice(7);
-    const { userId } = verifyToken<JwtPayload>(token);
-
     const { subjectIds } = await req.json();
 
     // ✅ EXACT legacy validation
@@ -34,7 +33,7 @@ export async function POST(req: NextRequest) {
       .delete()
       .eq("user_id", userId);
 
-    // 2️⃣ Insert new ones
+    // 2️⃣ Insert new subjects
     if (subjectIds.length > 0) {
       await supabase.from("user_subjects").insert(
         subjectIds.map((id: string) => ({
@@ -45,7 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3️⃣ Update count
+    // 3️⃣ Update active subject count
     await supabase
       .from("users")
       .update({ active_subject_count: subjectIds.length })

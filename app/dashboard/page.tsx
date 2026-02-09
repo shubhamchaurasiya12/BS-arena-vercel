@@ -1,8 +1,9 @@
 // app/dashboard/page.tsx
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
+
 
 import DeleteSubjectButton from "@/components/DeleteSubjectButton";
 import AuthUserSync from "@/components/AuthUserSync";
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
     .from("users")
     .select("id, name, email, total_points, active_subject_count")
     .eq("email", session.user.email)
-    .single();
+    .maybeSingle();
 
   if (!user) redirect("/login");
 
