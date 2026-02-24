@@ -1,0 +1,600 @@
+/* D:\BS-arena-NextJS\app\quiz\quiz.module.css - UPDATED FOR DARK MODE */
+
+.shell {
+  min-height: 100vh;
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  position: relative;
+  padding: 0 0 80px;
+}
+
+.shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%,  rgba(0, 33, 71, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(201, 168, 76, 0.06) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 18px 0;
+}
+
+@media (min-width: 768px) { .inner { padding: 48px 40px 0; } }
+
+/* ── States ── */
+.stateCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 14px;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(0, 33, 71, 0.1);
+  border-top-color: var(--navy-mid);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.stateText { font-size: 14px; color: var(--muted); }
+.errorMsg  { font-size: 15px; color: var(--danger); font-weight: 600; }
+
+.errorWrap {
+  max-width: 420px;
+  margin: 80px auto 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.errorIcon {
+  width: 52px;
+  height: 52px;
+  background: var(--danger-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--danger);
+}
+
+.errorTitle { font-size: 15px; font-weight: 600; color: var(--ink); }
+
+/* ── Bet panel header ── */
+.header { margin-bottom: 24px; }
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.heading {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.1;
+  margin: 0 0 5px;
+}
+
+.heading em { font-style: italic; color: var(--navy-mid); }
+.subheading  { font-size: 14px; color: var(--muted); }
+
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 51, 102, 0.14), transparent);
+  margin-bottom: 28px;
+}
+
+/* ── Sticky header bar ── */
+.stickyBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(250, 247, 242, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  margin: 0 -18px 24px;
+}
+
+@media (min-width: 768px) {
+  .stickyBar { padding: 14px 40px; margin: 0 -40px 28px; }
+}
+
+.stickyLeft  { display: flex; flex-direction: column; gap: 1px; }
+.stickyRight { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.progressPill {
+  background: var(--tag-bg);
+  border-radius: 99px;
+  padding: 4px 12px;
+}
+
+.progressPillText {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy-mid);
+  letter-spacing: 0.04em;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: 'DM Sans', monospace;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.timerUrgent {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger);
+  animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── Progress bar ── */
+.progressWrap { margin-bottom: 24px; }
+
+.progressTrack {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.07);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--navy-mid), #0a5299);
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Question cards ── */
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  pointer-events: none;
+}
+
+.qHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.qNum {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--subtle);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 26px;
+  text-align: right;
+}
+
+.qText { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.55; flex: 1; }
+
+/* ===== TABLE STYLES FOR QUESTIONS AND OPTIONS ===== */
+
+/* Tables in questions */
+.qText table {
+  border-collapse: collapse;
+  margin: 1.2rem 0;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  font-size: 14px;
+}
+
+.qText th {
+  background: var(--tag-bg);
+  color: var(--navy-mid);
+  font-weight: 700;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--card-border);
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.qText td {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--card-border);
+  text-align: center;
+  color: var(--ink);
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.qText tr:last-child td {
+  border-bottom: none;
+}
+
+/* Zebra striping for better readability */
+.qText tbody tr:nth-child(even) td {
+  background: rgba(0, 33, 71, 0.02);
+}
+
+/* Hover effect on rows */
+.qText tbody tr:hover td {
+  background: rgba(0, 33, 71, 0.04);
+}
+
+/* Tables in options */
+.optionText table {
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.optionText th {
+  background: var(--tag-bg);
+  color: var(--navy-mid);
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--card-border);
+  text-align: center;
+  font-size: 12px;
+}
+
+.optionText td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--card-border);
+  text-align: center;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Math rendering inside tables */
+.qText th .katex,
+.qText td .katex,
+.optionText th .katex,
+.optionText td .katex {
+  font-size: 1em;
+  color: var(--navy-mid);
+}
+
+.qText th .katex-display,
+.qText td .katex-display,
+.optionText th .katex-display,
+.optionText td .katex-display {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+/* Special styling for the first column (row headers) */
+.qText td:first-child,
+.qText th:first-child,
+.optionText td:first-child,
+.optionText th:first-child {
+  font-weight: 600;
+  color: var(--navy-mid);
+  background: rgba(0, 33, 71, 0.03);
+}
+
+/* Compact tables for small spaces */
+.qText table.compact,
+.optionText table.compact {
+  font-size: 12px;
+}
+
+.qText table.compact th,
+.qText table.compact td,
+.optionText table.compact th,
+.optionText table.compact td {
+  padding: 0.4rem 0.6rem;
+}
+
+/* Responsive tables */
+@media (max-width: 640px) {
+  .qText table,
+  .optionText table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+  }
+  
+  .qText td, 
+  .qText th,
+  .optionText td,
+  .optionText th {
+    min-width: 80px;
+  }
+  
+  /* For tables with many columns */
+  .qText table.wide,
+  .optionText table.wide {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .qText td,
+  .optionText td {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .qText tbody tr:nth-child(even) td,
+  .optionText tbody tr:nth-child(even) td {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .qText tbody tr:hover td,
+  .optionText tbody tr:hover td {
+    background: rgba(0, 33, 71, 0.3);
+  }
+  
+  .qText td:first-child,
+  .qText th:first-child,
+  .optionText td:first-child,
+  .optionText th:first-child {
+    background: rgba(0, 33, 71, 0.4);
+  }
+}
+
+/* Optional: Add a subtle animation when tables appear */
+.qText table,
+.optionText table {
+  animation: tableFadeIn 0.4s ease;
+}
+
+@keyframes tableFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Style for table captions if needed */
+.qText table caption,
+.optionText table caption {
+  margin-bottom: 0.5rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: left;
+}
+
+/* Borders for specific table types */
+.qText table.bordered,
+.optionText table.bordered {
+  border: 2px solid var(--card-border);
+}
+
+.qText table.bordered th,
+.qText table.bordered td,
+.optionText table.bordered th,
+.optionText table.bordered td {
+  border-width: 2px;
+}
+
+/* Striped rows alternative */
+.qText table.striped tbody tr:nth-child(odd) td,
+.optionText table.striped tbody tr:nth-child(odd) td {
+  background: rgba(0, 33, 71, 0.02);
+}
+
+/* Options */
+.options { display: flex; flex-direction: column; gap: 8px; }
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid var(--card-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.option:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 33, 71, 0.15);
+  transform: translateX(3px);
+}
+
+.optionSelected {
+  background: rgba(0, 33, 71, 0.07) !important;
+  border-color: rgba(0, 33, 71, 0.3) !important;
+  transform: none !important;
+}
+
+.radio {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 33, 71, 0.2);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.radioSelected { border-color: var(--navy); background: var(--navy); }
+.radioDot      { width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+
+.optionLetter {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--subtle);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  width: 16px;
+  margin-top: 1px;
+}
+
+.optionSelected .optionLetter { color: var(--navy-mid); }
+.optionText { font-size: 14px; color: var(--ink); line-height: 1.5; flex: 1; }
+
+/* ── Submit ── */
+.submitWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.submitWarning {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #b8922a;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 10px;
+  padding: 8px 16px;
+}
+
+.btnSubmit {
+  width: 100%;
+  padding: 15px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  box-shadow: var(--shadow-navy);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.btnSubmit:hover:not(:disabled) {
+  background: #5ba3ff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-navy-lg);
+}
+
+.btnSubmit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.btnSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btnPrimary:hover { background: #5ba3ff; transform: translateY(-1px); }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim1 { animation: fadeUp 0.5s ease both; }
+.anim2 { animation: fadeUp 0.5s 0.08s ease both; }
+.anim3 { animation: fadeUp 0.5s 0.16s ease both; }

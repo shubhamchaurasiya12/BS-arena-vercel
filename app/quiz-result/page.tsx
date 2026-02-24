@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import MathText from "@/components/MathText";
+import styles from "./quizresult.module.css";
 
 type QuizQuestionResult = {
   id: string;
@@ -34,15 +36,28 @@ export default function QuizResultPage() {
   const week = searchParams.get("week");
   const hasUpdatedUser = useRef(false);
 
-  const { token, user, setUser } = useAuth();
+  const { token, user, setUser, isLoading: authLoading } = useAuth();
 
   const [result, setResult] = useState<QuizResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch Quiz Result
   useEffect(() => {
-    if (!attemptId || !token) {
+    // Wait for auth to finish resolving
+    if (authLoading) return;
+
+    // No token after auth resolved → redirect with properly encoded callbackUrl
+    if (!token) {
+      const callbackUrl = encodeURIComponent(
+        `/quiz-result?attemptId=${attemptId}&subjectId=${subjectId}&week=${week}`
+      );
+      router.push(`/login?callbackUrl=${callbackUrl}`);
+      return;
+    }
+
+    // No attemptId → show error
+    if (!attemptId) {
+      setError("No attempt ID provided");
       setLoading(false);
       return;
     }
@@ -58,11 +73,11 @@ export default function QuizResultPage() {
 
         setResult(data);
 
-        if (data.won && data.pointsChange > 0 && user && !hasUpdatedUser.current) {
+        if (data.won && data.pointsChange > 0 && user && setUser && !hasUpdatedUser.current) {
           hasUpdatedUser.current = true;
           const updatedUser = {
             ...user,
-            total_points: user.total_points + data.pointsChange,
+            total_points: (user.total_points || 0) + data.pointsChange,
           };
           setUser(updatedUser);
           localStorage.setItem("user", JSON.stringify(updatedUser));
@@ -75,26 +90,50 @@ export default function QuizResultPage() {
     };
 
     fetchResult();
-  }, [attemptId, token, user, setUser]);
+  }, [attemptId, token, authLoading]); // ← only deps that should re-trigger the fetch
 
-  if (loading) {
+  /* ── Auth loading ── */
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-[rgb(255,250,246)] flex items-center justify-center">
-        <p className="text-gray-600">Loading results...</p>
+      <div className={styles["qr-shell"]}>
+        <div className={styles["qr-state-center"]}>
+          <div className={styles["qr-spinner"]} />
+          <p className={styles["qr-state-text"]}>Checking authentication…</p>
+        </div>
       </div>
     );
   }
 
+  /* ── Loading ── */
+  if (loading) {
+    return (
+      <div className={styles["qr-shell"]}>
+        <div className={styles["qr-state-center"]}>
+          <div className={styles["qr-spinner"]} />
+          <p className={styles["qr-state-text"]}>Loading results…</p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Error ── */
   if (error) {
     return (
-      <div className="min-h-screen bg-[rgb(255,250,246)] flex items-center justify-center">
-        <div className="bg-[rgb(225,220,213)] p-6 rounded-2xl shadow-xl border border-gray-200">
-          <p className="text-red-600 font-semibold">{error}</p>
+      <div className={styles["qr-shell"]}>
+        <div className={styles["qr-error-wrap"]}>
+          <div className={styles["qr-error-icon"]}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <p className={styles["qr-error-title"]}>{error}</p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="mt-4 bg-black text-white px-6 py-3 rounded-2xl shadow-md hover:bg-gray-900 w-full transition-all duration-300"
+            className={`${styles["qr-btn"]} ${styles["qr-btn--primary"]}`}
           >
-            Back to Dashboard
+            ← Back to Dashboard
           </button>
         </div>
       </div>
@@ -103,95 +142,178 @@ export default function QuizResultPage() {
 
   if (!result) return null;
 
+  const scoreColor =
+    result.score >= 70 ? "#16a34a" : result.score >= 40 ? "#003366" : "#dc2626";
+
   return (
-    <div className="min-h-screen bg-[rgb(255,250,246)] p-6">
-      {/* Header */}
-      <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
-        Quiz Results
-      </h1>
-      <div className="mt-2 h-[1px] bg-gradient-to-r from-transparent via-[#003366]/20 to-transparent mb-6"></div>
+    <div className={styles["qr-shell"]}>
+      <div className={styles["qr-inner"]}>
+        {/* ── Header ── */}
+        <header className={`${styles["qr-header"]} ${styles["anim-1"]}`}>
+          <div>
+            <p className={styles["qr-label"]}>Week {week} · Results</p>
+            <h1 className={styles["qr-heading"]}>
+              Quiz <em>Results</em>
+            </h1>
+            <p className={styles["qr-subheading"]}>
+              {result.correct} of {result.total} correct
+            </p>
+          </div>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className={`${styles["qr-btn"]} ${styles["qr-btn--ghost"]}`}
+          >
+            Dashboard
+          </button>
+        </header>
 
-      {/* Score Card */}
-      <div className="bg-[rgb(225,220,213)] rounded-2xl shadow-xl border border-gray-200 p-6 mb-6 text-center">
-        <div className={`text-6xl font-bold mb-2 ${result.won ? "text-green-600" : "text-red-600"}`}>
-          {result.score}%
-        </div>
-        <p className="text-gray-700 text-xl mb-4">{result.correct} / {result.total} correct</p>
+        <div className={styles["qr-divider"]} />
 
-        <div className={`p-4 rounded-2xl ${result.won ? "bg-green-100" : "bg-red-100"}`}>
-          {result.won ? (
-            <>
-              <p className="text-green-800 font-bold text-2xl mb-2">🎉 Congratulations! You Won!</p>
-              <p className="text-green-700 text-lg">+{result.pointsChange} points earned (Bet: {result.bet})</p>
-            </>
-          ) : (
-            <>
-              <p className="text-red-800 font-bold text-2xl mb-2">❌ Better Luck Next Time</p>
-              <p className="text-red-700 text-lg">-{result.bet} points lost</p>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Answer Review */}
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Answer Review</h2>
-      <div className="mt-2 h-[1px] bg-gradient-to-r from-transparent via-[#003366]/20 to-transparent mb-6"></div>
-
-      {result.questions.map((q, idx) => (
+        {/* ── Score card ── */}
         <div
-          key={q.id}
-          className={`bg-[rgb(225,220,213)] rounded-2xl shadow-xl border border-gray-200 p-4 mb-4`}
+          className={`${styles["qr-score-card"]} ${
+            result.won ? styles["qr-score-card--won"] : styles["qr-score-card--lost"]
+          } ${styles["anim-2"]}`}
         >
-          <div className="flex items-start gap-2 mb-3">
-            <span className={`font-bold text-lg ${q.isCorrect ? "text-green-600" : "text-red-600"}`}>
-              {q.isCorrect ? "✓" : "✗"}
-            </span>
-            <p className="font-medium text-gray-800">{idx + 1}. {q.question}</p>
+          <div className={styles["qr-score-num"]} style={{ color: scoreColor }}>
+            {result.score}%
           </div>
 
-          <div className="ml-6 space-y-2">
-            {q.options.map((opt, optIdx) => {
-              const isCorrect = optIdx === q.correctIndex;
-              const isUser = optIdx === q.userAnswer;
+          <div className={styles["qr-score-stats"]}>
+            <div className={styles["qr-stat"]}>
+              <span className={styles["qr-stat-value"]}>{result.correct}/{result.total}</span>
+              <span className={styles["qr-stat-label"]}>Correct</span>
+            </div>
+            <div className={styles["qr-stat-divider"]} />
+            <div className={styles["qr-stat"]}>
+              <span className={styles["qr-stat-value"]}>{result.bet}</span>
+              <span className={styles["qr-stat-label"]}>Bet (pts)</span>
+            </div>
+            <div className={styles["qr-stat-divider"]} />
+            <div className={styles["qr-stat"]}>
+              <span
+                className={styles["qr-stat-value"]}
+                style={{ color: result.won ? "#16a34a" : "#dc2626" }}
+              >
+                {result.won ? `+${result.pointsChange}` : `-${result.bet}`}
+              </span>
+              <span className={styles["qr-stat-label"]}>Points</span>
+            </div>
+          </div>
 
-              return (
-                <div
-                  key={optIdx}
-                  className={`p-2 rounded ${
-                    isCorrect
-                      ? "bg-green-200 font-semibold"
-                      : isUser
-                      ? "bg-red-200"
-                      : "bg-white"
-                  }`}
-                >
-                  {isCorrect && "✓ "}
-                  {isUser && !isCorrect && "✗ "}
-                  {opt}
-                  {isCorrect && <span className="ml-2 text-sm text-green-700">(Correct Answer)</span>}
-                  {isUser && !isCorrect && <span className="ml-2 text-sm text-red-700">(Your Answer)</span>}
-                </div>
-              );
-            })}
+          <div
+            className={`${styles["qr-result-banner"]} ${
+              result.won ? styles["qr-result-banner--won"] : styles["qr-result-banner--lost"]
+            }`}
+          >
+            <span className={styles["qr-result-banner__icon"]}>
+              {result.won ? "🎉" : "📚"}
+            </span>
+            <div>
+              <p className={styles["qr-result-banner__title"]}>
+                {result.won ? "Congratulations! You Won!" : "Better Luck Next Time"}
+              </p>
+              <p className={styles["qr-result-banner__sub"]}>
+                {result.won
+                  ? `+${result.pointsChange} points earned from your ${result.bet}-point bet`
+                  : `You lost your ${result.bet}-point bet. Review the answers below.`}
+              </p>
+            </div>
           </div>
         </div>
-      ))}
 
-      {/* Action Buttons */}
-      <div className="flex flex-col md:flex-row gap-4 justify-center mt-4">
-        <button
-          onClick={() => router.push(`/quiz?subjectId=${subjectId}&week=${week}`)}
-          className="bg-black text-white px-8 py-3 rounded-2xl shadow-md hover:bg-gray-900 w-full md:w-auto transition-all duration-300"
-        >
-          Retake Quiz
-        </button>
+        {/* ── Questions ── */}
+        <div className={`${styles["qr-section-header"]} ${styles["anim-3"]}`}>
+          <span className={styles["qr-section-pip"]} />
+          <h2 className={styles["qr-section-title"]}>Answer Review</h2>
+        </div>
 
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="bg-black text-white px-8 py-3 rounded-2xl shadow-md hover:bg-gray-900 w-full md:w-auto transition-all duration-300"
-        >
-          Back to Dashboard
-        </button>
+        <div className={`${styles["qr-questions"]} ${styles["anim-3"]}`}>
+          {result.questions.map((q, idx) => (
+            <div
+              key={q.id}
+              className={`${styles["qr-card"]} ${
+                q.isCorrect ? styles["qr-card--correct"] : styles["qr-card--wrong"]
+              }`}
+            >
+              <div className={styles["qr-q-header"]}>
+                <span
+                  className={`${styles["qr-q-badge"]} ${
+                    q.isCorrect ? styles["qr-q-badge--correct"] : styles["qr-q-badge--wrong"]
+                  }`}
+                />
+                <span className={styles["qr-q-num"]}>{idx + 1}</span>
+                <div className={styles["qr-q-text"]}>
+                  <MathText text={q.question} />
+                </div>
+              </div>
+
+              <div className={styles["qr-options"]}>
+                {q.options.map((opt, optIdx) => {
+                  const isCorrect = optIdx === q.correctIndex;
+                  const isUser = optIdx === q.userAnswer;
+                  const isWrong = isUser && !isCorrect;
+
+                  return (
+                    <div
+                      key={optIdx}
+                      className={`${styles["qr-option"]} ${
+                        isCorrect
+                          ? styles["qr-option--correct"]
+                          : isWrong
+                          ? styles["qr-option--wrong"]
+                          : ""
+                      }`}
+                    >
+                      <span
+                        className={`${styles["qr-option-dot"]} ${
+                          isCorrect
+                            ? styles["qr-option-dot--correct"]
+                            : isWrong
+                            ? styles["qr-option-dot--wrong"]
+                            : styles["qr-option-dot--neutral"]
+                        }`}
+                      />
+                      <span className={styles["qr-option-letter"]}>
+                        {String.fromCharCode(65 + optIdx)}
+                      </span>
+                      <span className={styles["qr-option-text"]}>
+                        <MathText text={opt} />
+                      </span>
+                      {(isCorrect || isWrong) && (
+                        <span
+                          className={`${styles["qr-option-tag"]} ${
+                            isCorrect
+                              ? styles["qr-option-tag--correct"]
+                              : styles["qr-option-tag--wrong"]
+                          }`}
+                        >
+                          {isCorrect ? "Correct" : "Your answer"}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Actions ── */}
+        <div className={`${styles["qr-actions"]} ${styles["anim-3"]}`}>
+          <button
+            onClick={() => router.push(`/quiz?subjectId=${subjectId}&week=${week}`)}
+            className={`${styles["qr-btn"]} ${styles["qr-btn--ghost"]}`}
+          >
+            Retake Quiz
+          </button>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className={`${styles["qr-btn"]} ${styles["qr-btn--primary"]}`}
+          >
+            Dashboard
+          </button>
+        </div>
       </div>
     </div>
   );

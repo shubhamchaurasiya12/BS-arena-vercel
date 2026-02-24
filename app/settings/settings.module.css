@@ -1,0 +1,432 @@
+/* ============================================================
+   SETTINGS MODULE CSS
+   Matches SettingsClient.tsx component structure
+   ============================================================ */
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+
+.settingsSections {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+
+.settingsSectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.settingsSectionTitle {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.settingsSectionDesc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.settingsSection {
+  scroll-margin-top: 80px;
+}
+
+.settingsCard {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--card-border, #e5e7eb);
+  border-radius: 20px;
+  padding: 28px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.settingsCard:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.settingsCardDanger {
+  background: rgba(220, 38, 38, 0.02);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+/* ============================================================
+   FIELDS
+   ============================================================ */
+
+.settingsField {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settingsLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.settingsHelp {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   THEME OPTIONS GRID
+   ============================================================ */
+
+.themeOptions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.themeOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: var(--card-bg, #ffffff);
+  border: 2px solid var(--card-border, #e5e7eb);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.themeOption:hover:not(:disabled) {
+  border-color: var(--navy-mid, #3b82f6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+.themeOption:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.themeOptionActive {
+  border-color: var(--navy, #002147);
+  background: rgba(0, 33, 71, 0.04);
+  box-shadow: 0 4px 12px rgba(0, 33, 71, 0.08);
+}
+
+.themeOptionIcon {
+  font-size: 1.3rem;
+}
+
+.themeOptionLabel {
+  flex: 1;
+  font-weight: 600;
+}
+
+/* ============================================================
+   THEME PREVIEW
+   ============================================================ */
+
+.themePreview {
+  margin: 24px 0 20px;
+}
+
+.themePreviewLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.themePreviewCard {
+  border: 1px solid var(--card-border, #e5e7eb);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.themePreviewLight {
+  background: #fafafa;
+  color: #1a1a1a;
+}
+
+.themePreviewDark {
+  background: #0d0d0d;
+  color: #e8e8e8;
+  border-color: #333;
+}
+
+.themePreviewTerminal {
+  background: #000000;
+  color: #00ff66;
+  font-family: 'DM Mono', monospace;
+  border-color: #1a1a1a;
+}
+
+.previewContent {
+  padding: 16px;
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+.previewTitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.previewSubtitle {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.previewBody {
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 60px;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.btnPrimary {
+  background: var(--navy, #002147);
+  color: white;
+  box-shadow: 0 4px 14px rgba(0, 33, 71, 0.25);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: var(--navy-mid, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 33, 71, 0.3);
+}
+
+.btnDanger {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+  border: 1.5px solid rgba(220, 38, 38, 0.3);
+}
+
+.btnDanger:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btnSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+/* ============================================================
+   ACTIONS & UTILITIES
+   ============================================================ */
+
+.settingsActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.settingsError {
+  font-size: 13px;
+  color: #dc2626;
+  padding: 8px 12px;
+  background: rgba(220, 38, 38, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.15);
+  width: 100%;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim1 { animation: fadeUp 0.4s 0.0s ease both; }
+.anim2 { animation: fadeUp 0.4s 0.1s ease both; }
+.anim3 { animation: fadeUp 0.4s 0.2s ease both; }
+.anim4 { animation: fadeUp 0.4s 0.3s ease both; }
+.anim5 { animation: fadeUp 0.4s 0.4s ease both; }
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+
+/* Tablet (641px - 768px) */
+@media (min-width: 641px) and (max-width: 768px) {
+  .settingsCard {
+    padding: 24px;
+  }
+
+  .themeOptions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile (≤ 640px) */
+@media (max-width: 640px) {
+  .settingsSections {
+    gap: 32px;
+  }
+
+  .settingsCard {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .settingsSectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .settingsSectionDesc {
+    font-size: 13px;
+  }
+
+  /* Theme options - vertical stack on mobile */
+  .themeOptions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 12px 0 20px;
+  }
+
+  .themeOption {
+    padding: 14px 16px;
+  }
+
+  .themeOptionIcon {
+    font-size: 1.2rem;
+  }
+
+  /* Preview adjustments */
+  .previewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .previewSubtitle {
+    font-size: 10px;
+  }
+
+  .previewBody {
+    font-size: 12px;
+    min-height: 50px;
+  }
+
+  /* Buttons full width on mobile */
+  .btn {
+    width: 100%;
+    padding: 14px 20px;
+  }
+
+  .settingsActions {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  /* Danger zone specific */
+  .danger-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+
+/* Small Mobile (≤ 380px) */
+@media (max-width: 380px) {
+  .settingsCard {
+    padding: 16px 12px;
+  }
+
+  .themeOption {
+    padding: 12px 14px;
+  }
+
+  .themeOptionIcon {
+    font-size: 1.1rem;
+  }
+
+  .themeOptionLabel {
+    font-size: 13px;
+  }
+
+  .settingsSectionTitle {
+    font-size: 1.4rem;
+  }
+}

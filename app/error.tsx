@@ -1,3 +1,4 @@
+//D:\BS-arena-NextJS\app\error.tsx
 "use client";
 
 export default function GlobalError({

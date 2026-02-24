@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import styles from "./subjectselection.module.css";
 
 type Subject = {
   id: string;
@@ -20,40 +21,28 @@ export default function SubjectSelectionPage() {
 
     async function loadSubjects() {
       try {
-        // ✅ NextAuth: cookies are sent automatically
-        const res = await fetch("/api/subjects", {
-          credentials: "include",
-        });
-
+        const res = await fetch("/api/subjects", { credentials: "include" });
         if (!res.ok) {
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           throw new Error(data.message || "Failed to load subjects");
         }
+        const data = await res.json();
 
-        const { subjects, selectedSubjectIds } = await res.json();
+        const subjectsArray: Subject[] = Array.isArray(data.subjects) ? data.subjects : [];
+        const selectedSubjectIds: string[] = Array.isArray(data.selectedSubjectIds) ? data.selectedSubjectIds : [];
 
         if (!cancelled) {
-          setSubjects(
-            subjects.filter(
-              (s: Subject) => !selectedSubjectIds.includes(s.id)
-            )
-          );
+          setSubjects(subjectsArray.filter((s) => !selectedSubjectIds.includes(s.id)));
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load subjects"
-          );
-        }
+        if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load subjects");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
     loadSubjects();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
   const addSubject = async () => {
@@ -68,8 +57,8 @@ export default function SubjectSelectionPage() {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message);
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to add subject");
       }
 
       router.push("/dashboard");
@@ -81,75 +70,79 @@ export default function SubjectSelectionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[rgb(255,250,246)] text-black">
-        Loading subjects...
+      <div className={styles["ss-shell"]}>
+        <div className={styles["ss-state-center"]}>
+          <div className={styles["ss-spinner"]} />
+          <p className={styles["ss-state-text"]}>Loading subjects…</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen -mt-8 -mb-3 bg-[rgb(255,250,246)] text-black">
-      {/* ================= HEADER ================= */}
-      <header className="w-full py-10 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold">
-          Select Your Subjects
+    <main className={styles["ss-shell"]}>
+      <header className={`${styles["ss-header"]} ${styles["anim-1"]}`}>
+        <p className={styles["ss-label"]}>Get Started</p>
+        <h1 className={styles["ss-heading"]}>
+          Select Your <em>Subjects</em>
         </h1>
-        <p className="mt-2 text-lg text-gray-700">
-          Choose from the available subjects to start learning
+        <p className={styles["ss-subheading"]}>
+          Choose from available subjects to start learning
         </p>
       </header>
 
-      {/* ================= HERO VIDEO ================= */}
-      <div className="relative w-full h-[280px] md:h-[360px] overflow-hidden">
-        {/* Top fade line */}
-        <div className="absolute top-0 left-0 w-full h-[0.8px]
-          bg-gradient-to-r from-transparent via-black/40 to-transparent z-10" />
-
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover"
-        >
-          <source src="/hero-video.mp4" type="video/mp4" />
-        </video>
-
-        {/* Bottom fade line */}
-        <div className="absolute bottom-0 left-0 w-full h-[0.8px]
-          bg-gradient-to-r from-transparent via-black/40 to-transparent z-10" />
-      </div>
-
-      {/* ================= SUBJECT SECTION ================= */}
-      <div className="max-w-6xl mx-auto p-6">
+      <div className={`${styles["ss-content"]} ${styles["anim-2"]}`}>
         {error && (
-          <p className="text-red-600 text-center mb-4">{error}</p>
+          <div className={styles["ss-error-banner"]}>
+            {error}
+          </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mb-8 mt-8">
-          {subjects.map((s) => (
+        {subjects.length === 0 && !error && (
+          <div className={styles["ss-empty"]}>
+            <div className={styles["ss-empty-icon"]}>★</div>
+            <p className={styles["ss-empty-title"]}>All subjects added</p>
+            <p className={styles["ss-empty-sub"]}>
+              You've already added all available subjects.
+            </p>
+          </div>
+        )}
+
+        <div className={styles["ss-grid"]}>
+          {subjects.map((s, i) => (
             <button
               key={s.id}
-              onClick={() => setSelected(s.id)}
-              className={`p-5 rounded-xl border text-lg font-semibold transition-all duration-200
-                ${
-                  selected === s.id
-                    ? "bg-black text-white border-black scale-105 shadow-lg"
-                    : "bg-white border-gray-300 hover:shadow-md hover:bg-gray-50"
-                }
-              `}
+              onClick={() => setSelected(s.id === selected ? null : s.id)}
+              className={`${styles["ss-subject-btn"]} ${
+                selected === s.id ? styles["ss-subject-btn--selected"] : ""
+              }`}
+              style={{ animationDelay: `${0.05 * i}s` }}
             >
-              {s.name}
+              <span className={styles["ss-subject-idx"]}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className={styles["ss-subject-name"]}>
+                {s.name}
+              </span>
+
+              {selected === s.id && (
+                <span className={styles["ss-subject-check"]}>✓</span>
+              )}
             </button>
           ))}
         </div>
 
-        {/* ADD BUTTON */}
-        <div className="flex justify-center mb-10">
+        <div className={styles["ss-action"]}>
+          {selected && (
+            <p className={styles["ss-selection-hint"]}>
+              <em>{subjects.find(s => s.id === selected)?.name}</em> selected
+            </p>
+          )}
+
           <button
             onClick={addSubject}
             disabled={!selected}
-            className="bg-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-900 disabled:opacity-40"
+            className={styles["ss-add-btn"]}
           >
             Add Subject
           </button>

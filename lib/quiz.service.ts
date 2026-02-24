@@ -1,3 +1,4 @@
+// D:\BS-arena-NextJS\lib\quiz.service.ts
 import { supabase } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 
@@ -61,6 +62,11 @@ function getElapsedSeconds(startTime: string): number {
   const start = new Date(timeStr).getTime();
   const now = Date.now();
   return Math.floor((now - start) / 1000);
+}
+
+// Clean LaTeX escaping from PostgreSQL JSONB
+function cleanLatex(text: string): string {
+  return text.replace(/\\\\/g, '\\');
 }
 
 /* ================================
@@ -210,8 +216,8 @@ export async function getQuizAttempt({
   const questions = (attempt.selected_questions as SelectedQuestion[]).map(
     (q) => ({
       id: q.id,
-      question: q.question,
-      options: q.options,
+      question: cleanLatex(q.question),
+      options: q.options.map(opt => cleanLatex(opt)),
     })
   );
 
@@ -341,67 +347,115 @@ export async function recordTabSwitch({
 }
 
 /* ================================
-   💰 APPLY POINTS
+   💰 APPLY POINTS (CORRECT LOGIC)
 ================================ */
 export async function applyQuizPoints({
   userId,
   attemptId,
-}: AttemptArgs) {
-  const { data: attempt } = await supabase
+}: {
+  userId: string;
+  attemptId: string;
+}) {
+  // ============================
+  // 1️⃣ Fetch Attempt
+  // ============================
+
+  const { data: attempt, error: attemptError } = await supabase
     .from("quiz_attempts")
     .select("*")
     .eq("id", attemptId)
     .single();
 
-  if (!attempt || attempt.user_id !== userId) {
-    throw { status: 403, message: "Access denied" };
+  if (attemptError || !attempt) {
+    throw new Error("Attempt not found");
+  }
+
+  if (attempt.user_id !== userId) {
+    throw new Error("Unauthorized");
   }
 
   if (attempt.points_applied) {
-    throw { status: 409, message: "Points already applied" };
+    return {
+      success: true,
+      newTotalPoints: null,
+      message: "Points already applied",
+    };
   }
 
-  const isWin =
-    attempt.status === "COMPLETED" ||
-    (attempt.score !== null && attempt.score >= 80);
+  const won = attempt.score >= 80;
 
-  const pointsChange = isWin ? attempt.bet * 2 : 0;
+  // ============================
+  // 2️⃣ Fetch user
+  // ============================
 
-  if (pointsChange > 0) {
-    const { data: user } = await supabase
-      .from("users")
-      .select("total_points")
-      .eq("id", userId)
-      .single();
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("total_points, active_subject_count")
+    .eq("id", userId)
+    .single();
 
-    if (user) {
-      await supabase
-        .from("users")
-        .update({
-          total_points: user.total_points + pointsChange,
-        })
-        .eq("id", userId);
-
-      await supabase.from("points_history").insert({
-        id: uuidv4(),
-        user_id: userId,
-        change: pointsChange,
-        reason: "Quiz won",
-      });
-    }
+  if (userError || !user) {
+    throw new Error("User not found");
   }
+
+  let newTotalPoints = user.total_points;
+
+  // ============================
+  // 3️⃣ Apply Win Logic
+  // ============================
+
+  if (won) {
+    const reward = attempt.bet * 2;
+
+    newTotalPoints = user.total_points + reward;
+
+    await supabase.from("points_history").insert({
+      id: uuidv4(),
+      user_id: userId,
+      change: reward,
+      reason: "Quiz win reward",
+    });
+  }
+
+  // ============================
+  // 4️⃣ Update user
+  // ============================
+
+  await supabase
+    .from("users")
+    .update({ total_points: newTotalPoints })
+    .eq("id", userId);
+
+  // ============================
+  // 5️⃣ Mark points applied
+  // ============================
 
   await supabase
     .from("quiz_attempts")
     .update({ points_applied: true })
     .eq("id", attemptId);
 
+  // ============================
+  // 6️⃣ Recalculate group stats
+  // ============================
+
+  const { data: membership } = await supabase
+    .from("group_members")
+    .select("group_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (membership) {
+    await recalculateGroupStats(membership.group_id);
+  }
+
   return {
-    attemptId,
-    pointsChange,
-    status: attempt.status,
+    success: true,
+    newTotalPoints,
   };
 }
+
+
 
 /* ================================
    📊 GET RESULT
@@ -429,8 +483,8 @@ export async function getQuizResult({
 
   const questions = selectedQuestions.map((q) => ({
     id: q.id,
-    question: q.question,
-    options: q.options,
+    question: cleanLatex(q.question),
+    options: q.options.map(opt => cleanLatex(opt)),
     correctIndex: q.correctIndex,
     userAnswer:
       userAnswers[q.id] !== undefined ? userAnswers[q.id] : null,
@@ -453,4 +507,50 @@ export async function getQuizResult({
     questions,
     tabSwitchCount: attempt.tab_switch_count || 0,
   };
+}
+
+export async function recalculateGroupStats(groupId: string) {
+  const { data: members } = await supabase
+    .from("group_members")
+    .select("user_id")
+    .eq("group_id", groupId);
+
+  if (!members || members.length === 0) return;
+
+  let totalPoints = 0;
+  let totalLP = 0;
+
+  for (const member of members) {
+    const { data: user } = await supabase
+      .from("users")
+      .select("total_points, active_subject_count")
+      .eq("id", member.user_id)
+      .single();
+
+    const lp =
+      user.total_points /
+      Math.max(user.active_subject_count, 1);
+
+    totalPoints += user.total_points;
+    totalLP += lp;
+  }
+
+  const totalMembers = members.length;
+
+  await supabase
+    .from("group_stats")
+    .update({
+      total_points: totalPoints,
+      total_leaderboard_points: totalLP,
+      total_members: totalMembers,
+      updated_at: new Date(),
+    })
+    .eq("group_id", groupId);
+
+  await supabase
+    .from("groups")
+    .update({
+      is_active: totalMembers >= 2,
+    })
+    .eq("id", groupId);
 }

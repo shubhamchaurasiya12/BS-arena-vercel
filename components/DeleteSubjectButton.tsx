@@ -1,5 +1,5 @@
+//D:\BS-arena-NextJS\components\DeleteSubjectButton.tsx
 "use client";
-
 import { useRouter } from "next/navigation";
 
 export default function DeleteSubjectButton({
@@ -10,22 +10,23 @@ export default function DeleteSubjectButton({
   const router = useRouter();
 
   async function handleDelete() {
-    const token = document.cookie
-      .split("; ")
-      .find((r) => r.startsWith("token="))
-      ?.split("=")[1];
+    try {
+      const res = await fetch(`/api/subjects/${subjectId}`, {
+        method: "DELETE",
+        credentials: "include", // ✅ important for NextAuth session
+      });
 
-    if (!token) return;
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to remove subject");
+      }
 
-    await fetch(`/api/subjects/${subjectId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    // ✅ Re-fetch SSR data
-    router.refresh();
+      // Refresh SSR dashboard data
+      router.refresh();
+    } catch (err) {
+      console.error("Delete subject error:", err);
+      alert("Failed to remove subject");
+    }
   }
 
   return (

@@ -53,9 +53,10 @@ export const authOptions: NextAuthOptions = {
           id: crypto.randomUUID(),
           name: user.name ?? "User",
           email: user.email,
-          total_points: 100,                // 🎁 Welcome bonus
+          total_points: 100,
           active_subject_count: 0,
-          has_received_welcome_bonus: true, // 🛡 Guard
+          has_received_welcome_bonus: true,
+          role: "user", // ensure default role
         });
 
         if (insertError) {
@@ -66,7 +67,7 @@ export const authOptions: NextAuthOptions = {
         return true;
       }
 
-      // 🛡 Safety net: user exists but bonus not applied (migration case)
+      // 🛡 Safety net: user exists but bonus not applied
       if (!existingUser.has_received_welcome_bonus) {
         const { error: updateError } = await supabase
           .from("users")
@@ -93,7 +94,7 @@ export const authOptions: NextAuthOptions = {
 
       const { data, error } = await supabase
         .from("users")
-        .select("id, total_points, active_subject_count")
+        .select("id, total_points, active_subject_count, role")
         .eq("email", session.user.email)
         .maybeSingle();
 
@@ -101,6 +102,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = data.id;
         session.user.total_points = data.total_points;
         session.user.active_subject_count = data.active_subject_count;
+        session.user.role = data.role; // ✅ attach role
       }
 
       return session;

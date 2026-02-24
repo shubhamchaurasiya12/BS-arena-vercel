@@ -1,0 +1,147 @@
+/* D:\BS-arena-NextJS\app\rate-app\rate-app.module.css - UPDATED FOR DARK MODE */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap');
+
+/* Root */
+.rate-root {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  min-height: 100vh;
+  position: relative;
+  color: var(--ink);
+}
+
+.rate-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(0,33,71,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(201,168,76,0.08) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Layout */
+.rate-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 80px 24px 140px;
+}
+
+.rate-card {
+  background: var(--card-bg);
+  border-radius: 24px;
+  padding: 48px 40px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+  animation: fadeUp 0.5s ease;
+}
+
+/* Typography */
+.rate-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 2.4rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.rate-subtitle {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 40px;
+}
+
+/* Stars */
+.stars {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.star-btn {
+  font-size: 28px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: transform 0.2s, color 0.2s;
+  color: #cfcfcf;
+}
+
+.active {
+  color: var(--gold);
+}
+
+.star-btn:hover {
+  transform: scale(1.2);
+}
+
+/* Textarea */
+.textarea {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid var(--card-border);
+  background: rgba(255,255,255,0.7);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  resize: none;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  margin-bottom: 30px;
+}
+
+.textarea::placeholder {
+  color: var(--subtle);
+}
+
+.textarea:focus {
+  border-color: var(--navy-mid);
+  box-shadow: 0 0 0 3px rgba(0,33,71,0.08);
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: var(--navy);
+  color: #fff;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 18px rgba(0,33,71,0.25);
+}
+
+.submit-btn:hover {
+  background: #5ba3ff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,33,71,0.35);
+}
+
+/* Success */
+.success-msg {
+  text-align: center;
+  font-weight: 600;
+  color: var(--navy-mid);
+  font-size: 16px;
+  padding: 30px 0;
+}
+
+/* Animation */
+@keyframes fadeUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}

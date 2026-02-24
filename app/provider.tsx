@@ -1,3 +1,4 @@
+// D:\BS-arena-NextJS\app\provider.tsx
 "use client";
 
 import { SessionProvider } from "next-auth/react";

@@ -1,3 +1,4 @@
+//D:\BS-arena-NextJS\components\AuthUserSync.tsx
 "use client";
 
 import { useEffect } from "react";

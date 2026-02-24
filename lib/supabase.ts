@@ -1,3 +1,5 @@
+// D:\BS-arena-NextJS\lib\supabase.ts
+
 import { createClient } from "@supabase/supabase-js";
 
 /**

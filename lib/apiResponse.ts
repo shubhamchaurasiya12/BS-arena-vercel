@@ -1,3 +1,4 @@
+//D:\BS-arena-NextJS\lib\apiResponse.ts
 export type ApiSuccess<T> = {
   success: true;
   data: T;

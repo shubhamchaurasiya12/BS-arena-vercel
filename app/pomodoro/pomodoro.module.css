@@ -1,0 +1,406 @@
+/* D:\BS-arena-NextJS\app\pomodoro\pomodoro.module.css - UPDATED FOR DARK MODE */
+
+.shell {
+  min-height: 100vh;
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  position: relative;
+  padding: 28px 18px 80px;
+}
+
+.shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%,  rgba(0, 33, 71, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(201, 168, 76, 0.06) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@media (min-width: 768px) { .shell { padding: 48px 40px 80px; } }
+
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.header { margin-bottom: 36px; }
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.heading {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.1;
+  margin: 0 0 5px;
+}
+
+.heading em { font-style: italic; color: var(--navy-mid); }
+.subheading  { font-size: 14px; color: var(--muted); }
+
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 51, 102, 0.14), transparent);
+  margin-bottom: 36px;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Card ── */
+.card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  pointer-events: none;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+.cardPip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--navy);
+  flex-shrink: 0;
+}
+
+/* ── Timer display ── */
+.modeLabel {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.time {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(4.5rem, 16vw, 7rem);
+  font-weight: 400;
+  color: var(--navy);
+  text-align: center;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.timeBreak { color: #16a34a; }
+
+/* ── Mode selector ── */
+.modes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.modeBtn {
+  padding: 9px 22px;
+  border-radius: 99px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+}
+
+.modeBtnActive {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+  box-shadow: var(--shadow-navy);
+  transform: translateY(-1px);
+}
+
+.modeBtnInactive {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
+}
+
+.modeBtnInactive:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+}
+
+/* ── Action buttons ── */
+.btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.btn:hover  { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btnStart {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: var(--shadow-navy);
+}
+.btnStart:hover { background: #5ba3ff; box-shadow: var(--shadow-navy-lg); }
+
+.btnPause {
+  background: rgba(234, 179, 8, 0.12);
+  color: #854d0e;
+  border: 1.5px solid rgba(234, 179, 8, 0.3);
+}
+.btnPause:hover { background: rgba(234, 179, 8, 0.2); }
+
+.btnResume {
+  background: rgba(22, 163, 74, 0.1);
+  color: #166534;
+  border: 1.5px solid rgba(22, 163, 74, 0.25);
+}
+.btnResume:hover { background: rgba(22, 163, 74, 0.18); }
+
+.btnReset {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--danger);
+  border: 1.5px solid rgba(220, 38, 38, 0.2);
+}
+.btnReset:hover { background: rgba(220, 38, 38, 0.15); }
+
+.btnGroup { display: flex; flex-direction: column; gap: 10px; }
+
+.breakMsg {
+  text-align: center;
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.1rem;
+  color: #16a34a;
+  margin-top: 16px;
+  font-style: italic;
+}
+
+/* ── Todo panel ── */
+.todoInputRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.todoInput {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid var(--card-border);
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.todoInput::placeholder { color: var(--subtle); }
+
+.todoInput:focus {
+  border-color: rgba(0, 33, 71, 0.3);
+  box-shadow: 0 0 0 3px rgba(0, 33, 71, 0.07);
+}
+
+.todoAdd {
+  padding: 11px 18px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.todoAdd:hover { background: #5ba3ff; transform: translateY(-1px); }
+
+/* Progress bar */
+.progressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.progressLabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.progressPct {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1rem;
+  color: var(--navy-mid);
+}
+
+.progressTrack {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.07);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--navy-mid), #0a5299);
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Todo list */
+.todoList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.todoList::-webkit-scrollbar       { width: 4px; }
+.todoList::-webkit-scrollbar-track { background: transparent; }
+.todoList::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 2px; }
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: background 0.2s, transform 0.15s;
+  cursor: pointer;
+}
+
+.todoItem:hover { background: rgba(255, 255, 255, 0.9); transform: translateX(3px); }
+.todoItemDone   { opacity: 0.6; }
+
+.todoCheck {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 2px solid rgba(0, 33, 71, 0.2);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.todoCheckDone { background: var(--navy-mid); border-color: var(--navy-mid); }
+
+.todoCheckTick {
+  width: 10px;
+  height: 10px;
+  stroke: #fff;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.todoText     { flex: 1; font-size: 14px; color: var(--ink); line-height: 1.4; }
+.todoTextDone { text-decoration: line-through; color: var(--subtle); }
+
+.todoDelete {
+  background: none;
+  border: none;
+  color: var(--subtle);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.todoDelete:hover { color: var(--danger); background: rgba(220, 38, 38, 0.07); }
+
+.todoEmpty {
+  text-align: center;
+  padding: 32px 16px;
+  font-family: 'Instrument Serif', serif;
+  font-size: 1rem;
+  color: var(--subtle);
+  font-style: italic;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim1 { animation: fadeUp 0.5s ease both; }
+.anim2 { animation: fadeUp 0.5s 0.1s ease both; }
+.anim3 { animation: fadeUp 0.5s 0.18s ease both; }

@@ -1,0 +1,381 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+
+/* ───────────────────────── Shell ───────────────────────── */
+
+.ss-shell {
+  min-height: 100vh;
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  position: relative;
+  margin-top: -2rem;
+  margin-bottom: -0.75rem;
+  transition: background-color var(--transition-base);
+}
+
+.ss-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%, var(--navy-light) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, var(--gold-light) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+  transition: background-image var(--transition-slow);
+}
+
+/* Terminal theme override for background grid */
+:root[data-theme="terminal"] .ss-shell::before {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, var(--grid-opacity, 0.03)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, var(--grid-opacity, 0.03)) 1px, transparent 1px) !important;
+  background-size: var(--grid-size, 40px) var(--grid-size, 40px) !important;
+}
+
+/* ───────────────────────── Loading ───────────────────────── */
+
+.ss-state-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 14px;
+}
+
+.ss-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--navy-light);
+  border-top-color: var(--navy-mid);
+  border-radius: 50%;
+  animation: ssSpin 0.8s linear infinite;
+}
+
+@keyframes ssSpin {
+  to { transform: rotate(360deg); }
+}
+
+.ss-state-text {
+  font-size: 14px;
+  color: var(--muted);
+  transition: color var(--transition-base);
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+
+.ss-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 56px 24px 40px;
+}
+
+.ss-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  transition: color var(--transition-base);
+}
+
+.ss-heading {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.1;
+  margin: 0 0 10px;
+  transition: color var(--transition-base);
+}
+
+.ss-heading em {
+  font-style: italic;
+  color: var(--navy-mid);
+  transition: color var(--transition-base);
+}
+
+.ss-subheading {
+  font-size: 15px;
+  color: var(--muted);
+  transition: color var(--transition-base);
+}
+
+/* ───────────────────────── Content ───────────────────────── */
+
+.ss-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+@media (min-width: 768px) {
+  .ss-content {
+    padding: 0 40px 80px;
+  }
+}
+
+/* ───────────────────────── Error ───────────────────────── */
+
+.ss-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  background: var(--error-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  color: var(--error-text);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base);
+}
+
+/* ───────────────────────── Empty State ───────────────────────── */
+
+.ss-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 64px 16px;
+  text-align: center;
+}
+
+.ss-empty-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--navy-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  color: var(--navy-mid);
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+.ss-empty-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.3rem;
+  color: var(--ink);
+  font-weight: 400;
+  transition: color var(--transition-base);
+}
+
+.ss-empty-sub {
+  font-size: 13px;
+  color: var(--subtle);
+  max-width: 260px;
+  line-height: 1.6;
+  transition: color var(--transition-base);
+}
+
+/* ───────────────────────── Grid ───────────────────────── */
+
+.ss-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 36px 0;
+}
+
+@media (min-width: 480px) {
+  .ss-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .ss-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+/* ───────────────────────── Subject Card ───────────────────────── */
+
+.ss-subject-btn {
+  position: relative;
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 16px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  overflow: hidden;
+  transition: background var(--transition-base), border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
+  animation: fadeUp 0.4s ease both;
+  text-align: left;
+}
+
+.ss-subject-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+}
+
+.ss-subject-btn:hover {
+  background: var(--warm-white);
+  border-color: var(--navy-light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Terminal theme hover */
+:root[data-theme="terminal"] .ss-subject-btn:hover {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-navy-lg);
+}
+
+.ss-subject-btn--selected {
+  background: var(--navy) !important;
+  border-color: var(--navy) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: var(--shadow-navy-lg) !important;
+}
+
+/* Terminal theme selected */
+:root[data-theme="terminal"] .ss-subject-btn--selected {
+  background: var(--navy) !important;
+  border-color: var(--navy) !important;
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.3) !important;
+}
+
+.ss-subject-idx {
+  font-family: 'Instrument Serif', serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--subtle);
+  line-height: 1;
+  transition: color var(--transition-base);
+}
+
+.ss-subject-btn--selected .ss-subject-idx {
+  color: rgba(255,255,255,0.2);
+}
+
+.ss-subject-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+  transition: color var(--transition-base);
+}
+
+.ss-subject-btn--selected .ss-subject-name {
+  color: #fff;
+}
+
+.ss-subject-check {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* ───────────────────────── Action ───────────────────────── */
+
+.ss-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media (min-width: 480px) {
+  .ss-action {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.ss-selection-hint {
+  font-size: 13px;
+  color: var(--muted);
+  transition: color var(--transition-base);
+}
+
+.ss-selection-hint em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--navy-mid);
+  transition: color var(--transition-base);
+}
+
+.ss-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 32px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-navy);
+  transition: background var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-base), opacity var(--transition-base);
+  letter-spacing: 0.01em;
+}
+
+.ss-add-btn:hover:not(:disabled) {
+  background: var(--navy-mid);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-navy-lg);
+}
+
+/* Terminal theme button */
+:root[data-theme="terminal"] .ss-add-btn {
+  background: var(--navy-mid) !important;
+  color: #0A0A0A;
+  border: 2px solid var(--navy-mid);
+  box-shadow: 4px 4px 0px #0A0A0A, 4px 4px 0px 2px var(--navy-mid);
+  font-family: 'Space Grotesk', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+:root[data-theme="terminal"] .ss-add-btn:hover:not(:disabled) {
+  background: #ff6a2e !important;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #0A0A0A, 2px 2px 0px 2px var(--navy-mid);
+}
+
+.ss-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ───────────────────────── Animations ───────────────────────── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim-1 { animation: fadeUp 0.5s ease both; }
+.anim-2 { animation: fadeUp 0.5s 0.1s ease both; }

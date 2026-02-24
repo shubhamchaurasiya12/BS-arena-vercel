@@ -1,3 +1,4 @@
+//D:\BS-arena-NextJS\components\BetPanel.tsx
 "use client";
 
 import { useState } from "react";
