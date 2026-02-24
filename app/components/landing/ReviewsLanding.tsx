@@ -3,6 +3,25 @@
 
 import { useEffect, useRef, useState } from "react";
 
+/* =========================
+   Strict Types (Fixes TS)
+========================= */
+
+type BadgeColor = "navy" | "gold";
+
+type Review = {
+  initial: string;
+  color: string;
+  name: string;
+  meta: string;
+  stars: number;
+  text: string;
+  badge: string;
+  badgeColor: BadgeColor;
+  achievement: string;
+  location: string;
+};
+
 export default function ReviewsLanding() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -25,10 +44,14 @@ export default function ReviewsLanding() {
     return () => observer.disconnect();
   }, []);
 
-  const reviews = [
+  /* =========================
+        Reviews Data
+  ========================= */
+
+  const reviews: Review[] = [
     {
       initial: "A",
-      color: "#002147", // navy
+      color: "#002147",
       name: "Ananya Krishnan",
       meta: "DS Term 2 · Chennai",
       stars: 5,
@@ -40,7 +63,7 @@ export default function ReviewsLanding() {
     },
     {
       initial: "R",
-      color: "#c9a84c", // gold
+      color: "#c9a84c",
       name: "Rahul Mehta",
       meta: "DS Term 3 · Mumbai",
       stars: 5,
@@ -52,7 +75,7 @@ export default function ReviewsLanding() {
     },
     {
       initial: "S",
-      color: "#002147", // navy
+      color: "#002147",
       name: "Sneha Pillai",
       meta: "DS Term 1 · Bengaluru",
       stars: 5,
@@ -64,7 +87,7 @@ export default function ReviewsLanding() {
     },
     {
       initial: "K",
-      color: "#c9a84c", // gold
+      color: "#c9a84c",
       name: "Karan Nair",
       meta: "DS Term 4 · Hyderabad",
       stars: 4,
@@ -76,7 +99,7 @@ export default function ReviewsLanding() {
     },
     {
       initial: "P",
-      color: "#002147", // navy
+      color: "#002147",
       name: "Priya Iyer",
       meta: "DS Term 2 · Pune",
       stars: 5,
@@ -88,7 +111,7 @@ export default function ReviewsLanding() {
     },
     {
       initial: "D",
-      color: "#c9a84c", // gold
+      color: "#c9a84c",
       name: "Dev Sharma",
       meta: "DS Term 3 · Delhi",
       stars: 5,
@@ -100,25 +123,32 @@ export default function ReviewsLanding() {
     },
   ];
 
-  const getBadgeStyles = (badgeColor: string) => {
+  /* =========================
+        Helpers
+  ========================= */
+
+  const getBadgeStyles = (badgeColor: BadgeColor) => {
     if (badgeColor === "navy") {
       return {
         color: "#002147",
         borderColor: "rgba(0, 33, 71, 0.2)",
         background: "rgba(0, 33, 71, 0.08)",
       };
-    } else {
-      return {
-        color: "#c9a84c",
-        borderColor: "rgba(201, 168, 76, 0.2)",
-        background: "rgba(201, 168, 76, 0.08)",
-      };
     }
+
+    return {
+      color: "#c9a84c",
+      borderColor: "rgba(201, 168, 76, 0.2)",
+      background: "rgba(201, 168, 76, 0.08)",
+    };
   };
 
-  const renderStars = (count: number) => {
-    return "★".repeat(count) + "☆".repeat(5 - count);
-  };
+  const renderStars = (count: number) =>
+    "★".repeat(count) + "☆".repeat(5 - count);
+
+  /* =========================
+        Component JSX
+  ========================= */
 
   return (
     <section id="reviews" ref={sectionRef} className="reviews-section">
@@ -134,7 +164,7 @@ export default function ReviewsLanding() {
             <em>the cohort.</em>
           </h2>
         </div>
-        
+
         <div className="header-right">
           <div className="rating-card">
             <div className="rating-number">4.9</div>
@@ -154,64 +184,71 @@ export default function ReviewsLanding() {
       <div className="reviews-grid">
         {reviews.map((review, index) => {
           const badgeStyles = getBadgeStyles(review.badgeColor);
-          
+          const cohortMeta = review.meta?.split("·")?.[0]?.trim() ?? "";
+
           return (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="review-card r"
               onMouseEnter={() => setActiveIndex(index)}
               onMouseLeave={() => setActiveIndex(null)}
               style={{
-                transform: activeIndex === index ? 'translateY(-8px)' : 'none',
-                boxShadow: activeIndex === index ? '0 20px 40px rgba(0,0,0,0.08)' : 'none',
+                transform:
+                  activeIndex === index ? "translateY(-8px)" : "none",
+                boxShadow:
+                  activeIndex === index
+                    ? "0 20px 40px rgba(0,0,0,0.08)"
+                    : "none",
               }}
             >
               <div className="review-card-inner">
-                {/* Card Header */}
                 <div className="review-header">
                   <div className="reviewer-info">
-                    <div className="review-avatar" style={{ background: review.color }}>
+                    <div
+                      className="review-avatar"
+                      style={{ background: review.color }}
+                    >
                       {review.initial}
                     </div>
                     <div>
                       <div className="review-name">{review.name}</div>
                       <div className="review-meta">
-                        <span className="meta-location">📍 {review.location}</span>
+                        <span className="meta-location">
+                          📍 {review.location}
+                        </span>
                         <span className="meta-dot">•</span>
-                        <span>{review.meta.split('·')[0].trim()}</span>
+                        <span>{cohortMeta}</span>
                       </div>
                     </div>
                   </div>
                   <div className="review-quote">"</div>
                 </div>
 
-                {/* Stars */}
                 <div className="review-stars">
                   {renderStars(review.stars)}
                 </div>
 
-                {/* Review Text */}
                 <p className="review-text">{review.text}</p>
 
-                {/* Achievement & Badge Row */}
                 <div className="review-footer">
                   <div className="review-achievement">
                     <span className="achievement-icon">⚡</span>
-                    <span className="achievement-text">{review.achievement}</span>
+                    <span className="achievement-text">
+                      {review.achievement}
+                    </span>
                   </div>
-                  
-                  <span
-                    className="review-badge"
-                    style={badgeStyles}
-                  >
+
+                  <span className="review-badge" style={badgeStyles}>
                     {review.badge}
                   </span>
                 </div>
 
-                {/* Hover Gradient */}
-                <div className="card-glow" style={{ 
-                  background: `radial-gradient(circle at 100% 0%, ${review.color}15, transparent 70%)` 
-                }} />
+                <div
+                  className="card-glow"
+                  style={{
+                    background: `radial-gradient(circle at 100% 0%, ${review.color}15, transparent 70%)`,
+                  }}
+                />
               </div>
             </div>
           );
@@ -236,6 +273,7 @@ export default function ReviewsLanding() {
         </div>
       </div>
 
+      {/* ⚠️ YOUR FULL CSS BLOCK REMAINS EXACTLY AS YOU PROVIDED */}
       <style jsx>{`
         .reviews-section {
           padding: 120px 0;

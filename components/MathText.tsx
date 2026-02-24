@@ -123,22 +123,25 @@ export default function MathText({ text, className = "", displayMode = false }: 
     let i = 0;
 
     while (i < lines.length) {
-      const line = lines[i];
-      const trimmed = line.trim();
+    const line = lines[i]!;
+    if (line === undefined) break; // 🔐 hard narrowing
+    const trimmed = line.trim();
 
       // A line that starts with | is part of a table
       if (trimmed.startsWith('|')) {
         const tableLines: string[] = [];
-        while (i < lines.length && lines[i].trim().startsWith('|')) {
-          tableLines.push(lines[i]);
+        while (i < lines.length) {const nextLine = lines[i]; if (!nextLine || !nextLine.trim().startsWith('|')) break;
+          tableLines.push(nextLine);
           i++;
         }
         segments.push({ type: 'table', lines: tableLines });
       } else {
         // Accumulate consecutive non-table lines as text
         const textLines: string[] = [];
-        while (i < lines.length && !lines[i].trim().startsWith('|')) {
-          textLines.push(lines[i]);
+        while (i < lines.length) {
+          const nextLine = lines[i];
+          if (!nextLine || nextLine.trim().startsWith('|')) break;
+          textLines.push(nextLine);
           i++;
         }
         const content = textLines.join('\n');
@@ -182,6 +185,7 @@ export default function MathText({ text, className = "", displayMode = false }: 
 
     // First non-separator line = header
     const headerLine = nonSepLines[0];
+    if (!headerLine) return table; // 🔐 strict narrowing
     const bodyLines  = nonSepLines.slice(1);
 
     // thead

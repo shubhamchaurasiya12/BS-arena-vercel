@@ -23,7 +23,7 @@ type DashboardData = {
   };
   subjects?: {
     subject_id: string;
-    subjects: { name: string };
+    subjects: { name: string }[];
   }[];
   group?: {
     id: string;
@@ -182,7 +182,7 @@ export default async function DashboardPage() {
                     <p className="info-label">Subjects</p>
                     <p className="info-value" style={{ fontSize: '13px' }}>
                       {data.subjects && data.subjects.length > 0
-                        ? data.subjects.map((s) => s.subjects.name).join(", ")
+                        ? data.subjects.map((s) => s.subjects?.[0]?.name ?? "").filter(Boolean).join(", ")
                         : "None added yet"}
                     </p>
                   </div>
@@ -265,7 +265,7 @@ export default async function DashboardPage() {
                         className="subject-tile"
                       >
                         <span className="subject-tile__num">{idx + 1}</span>
-                        <p className="subject-tile__name">{s.subjects.name}</p>
+                        <p className="subject-tile__name">{s.subjects?.[0]?.name ?? "Unknown"}</p>
                         <p className="subject-tile__cta">View notes →</p>
                       </a>
                       <div className="subject-tile-delete">

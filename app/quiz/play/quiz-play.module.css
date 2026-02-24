@@ -397,9 +397,9 @@
 }
 
 /* ── Text Input (for bet) ── */
-input[type="text"],
-input[type="number"],
-input {
+.shell input[type="text"],
+.shell input[type="number"],
+.shell input {
   background: rgba(255, 255, 255, 0.7) !important;
   border: 1.5px solid rgba(0, 0, 0, 0.1) !important;
   color: var(--ink) !important;
@@ -409,38 +409,38 @@ input {
   font-size: 15px !important;
 }
 
-input[type="text"]::placeholder,
-input[type="number"]::placeholder,
-input::placeholder {
+.shell input[type="text"]::placeholder,
+.shell input[type="number"]::placeholder,
+.shell input::placeholder {
   color: var(--subtle) !important;
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input:focus {
+.shell input[type="text"]:focus,
+.shell input[type="number"]:focus,
+.shell input:focus {
   border-color: rgba(0, 33, 71, 0.3) !important;
   box-shadow: 0 0 0 3px rgba(0, 33, 71, 0.07) !important;
   background: rgba(255, 255, 255, 0.9) !important;
   outline: none;
 }
 
-:root[data-theme="dark"] input[type="text"],
-:root[data-theme="dark"] input[type="number"],
-:root[data-theme="dark"] input {
+:root[data-theme="dark"] .shell input[type="text"],
+:root[data-theme="dark"] .shell input[type="number"],
+:root[data-theme="dark"] .shell input {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1.5px solid rgba(255, 255, 255, 0.15) !important;
   color: #e8e8e8 !important;
 }
 
-:root[data-theme="dark"] input[type="text"]::placeholder,
-:root[data-theme="dark"] input[type="number"]::placeholder,
-:root[data-theme="dark"] input::placeholder {
+:root[data-theme="dark"] .shell input[type="text"]::placeholder,
+:root[data-theme="dark"] .shell input[type="number"]::placeholder,
+:root[data-theme="dark"] .shell input::placeholder {
   color: rgba(255, 255, 255, 0.4) !important;
 }
 
-:root[data-theme="dark"] input[type="text"]:focus,
-:root[data-theme="dark"] input[type="number"]:focus,
-:root[data-theme="dark"] input:focus {
+:root[data-theme="dark"] .shell input[type="text"]:focus,
+:root[data-theme="dark"] .shell input[type="number"]:focus,
+:root[data-theme="dark"] .shell input:focus {
   border-color: #5ba3ff !important;
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15) !important;
   background: rgba(255, 255, 255, 0.12) !important;

@@ -1,7 +1,6 @@
-//D:\BS-arena-NextJS\context\AuthContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 type User = {
   id: string;
@@ -14,25 +13,39 @@ type User = {
 type AuthContextType = {
   user: User | null;
   token: string | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>; // 👈 1. Added this line
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (userData: User, jwtToken: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean; // ✅ Added
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    if (typeof window === "undefined") return null;
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // ✅ Added
 
-  const [token, setToken] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
-  });
+  // Hydrate from localStorage safely on client
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem("user");
+      }
+    }
+
+    if (storedToken) {
+      setToken(storedToken);
+    }
+
+    setIsLoading(false); // ✅ Auth resolved
+  }, []);
 
   const login = (userData: User, jwtToken: string) => {
     setUser(userData);
@@ -53,10 +66,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         token,
-        setUser, // 👈 2. Included in value
+        setUser,
         login,
         logout,
         isAuthenticated: !!token,
+        isLoading, // ✅ Now exposed
       }}
     >
       {children}

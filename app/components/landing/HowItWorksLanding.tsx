@@ -3,7 +3,22 @@
 
 import { useEffect, useState, useRef } from "react";
 
-const steps = [
+/* ===== Strict Types (fixes TS error) ===== */
+
+type TagColorKey = "navy" | "gold";
+
+type Step = {
+  num: string;
+  title: string;
+  desc: string;
+  tag: string;
+  tagColor: TagColorKey;
+  icon: string;
+};
+
+/* ===== Steps Data ===== */
+
+const steps: Step[] = [
   { 
     num: "01", 
     title: "Join with your IITM BS email", 
@@ -39,7 +54,9 @@ const steps = [
 ];
 
 export default function HowItWorksLanding() {
-  const [visible, setVisible] = useState<boolean[]>(new Array(steps.length + 1).fill(false));
+  const [visible, setVisible] = useState<boolean[]>(
+    new Array(steps.length + 1).fill(false)
+  );
   const refs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -66,7 +83,12 @@ export default function HowItWorksLanding() {
     return () => observer.disconnect();
   }, []);
 
-  const tagColors: Record<string, { bg: string; color: string; border: string }> = {
+  /* ===== Strict Color Map ===== */
+
+  const tagColors: Record<
+    TagColorKey,
+    { bg: string; color: string; border: string }
+  > = {
     navy: { bg: "rgba(0, 33, 71, 0.08)", color: "#002147", border: "rgba(0, 33, 71, 0.2)" },
     gold: { bg: "rgba(201, 168, 76, 0.08)", color: "#c9a84c", border: "rgba(201, 168, 76, 0.2)" },
   };
@@ -84,7 +106,8 @@ export default function HowItWorksLanding() {
             opacity: visible[0] ? 1 : 0,
             transform: visible[0] ? "none" : "translateY(40px) scale(0.96)",
             filter: visible[0] ? "blur(0)" : "blur(4px)",
-            transition: "opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
+            transition:
+              "opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           <div className="header-badge">
@@ -92,7 +115,7 @@ export default function HowItWorksLanding() {
             <span className="section-eyebrow">// The Path to Glory</span>
           </div>
           <h2 className="section-heading">
-            From zero to<br/><em>semester topper.</em>
+            From zero to<br /><em>semester topper.</em>
           </h2>
           <p className="header-description">
             Four simple steps to transform your study routine into a competitive journey.
@@ -104,7 +127,7 @@ export default function HowItWorksLanding() {
         <div className="steps-grid">
           {steps.map((step, i) => {
             const tagColor = tagColors[step.tagColor];
-            
+
             return (
               <div
                 key={i}
@@ -116,24 +139,20 @@ export default function HowItWorksLanding() {
                   opacity: visible[i + 1] ? 1 : 0,
                   transform: visible[i + 1] ? "none" : "translateY(40px) scale(0.96)",
                   filter: visible[i + 1] ? "blur(0)" : "blur(4px)",
-                  transition: `opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1)`,
+                  transition:
+                    "opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s cubic-bezier(0.16, 1, 0.3, 1)",
                   transitionDelay: `${i * 0.08}s`,
                 }}
               >
                 <div className="step-card-inner">
-                  {/* Header with icon and number */}
                   <div className="step-header">
                     <span className="step-icon">{step.icon}</span>
                     <span className="step-number">{step.num}</span>
                   </div>
 
-                  {/* Title */}
                   <h3 className="step-title">{step.title}</h3>
-
-                  {/* Description */}
                   <p className="step-description">{step.desc}</p>
 
-                  {/* Tag */}
                   <div className="step-tag-container">
                     <span
                       className="step-tag"
@@ -155,11 +174,17 @@ export default function HowItWorksLanding() {
         {/* Progress Indicator */}
         <div className="progress-indicator">
           <div className="progress-line">
-            <div className="progress-fill" style={{ width: visible.filter(Boolean).length * 25 + '%' }} />
+            <div
+              className="progress-fill"
+              style={{ width: visible.filter(Boolean).length * 25 + "%" }}
+            />
           </div>
           <div className="progress-steps">
             {steps.map((_, i) => (
-              <div key={i} className={`progress-dot ${visible[i + 1] ? 'active' : ''}`}>
+              <div
+                key={i}
+                className={`progress-dot ${visible[i + 1] ? "active" : ""}`}
+              >
                 <span className="dot-label">Step {i + 1}</span>
               </div>
             ))}
@@ -167,6 +192,7 @@ export default function HowItWorksLanding() {
         </div>
       </div>
 
+      {/* 🔥 YOUR ENTIRE CSS BLOCK REMAINS EXACTLY AS YOU PROVIDED — UNCHANGED */}
       <style jsx>{`
         .how-section {
           padding: 120px 0;

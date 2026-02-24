@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import MathText from "@/components/MathText";
@@ -27,7 +27,8 @@ type QuizResult = {
   questions: QuizQuestionResult[];
 };
 
-export default function QuizResultPage() {
+// Main component that uses useSearchParams - wrapped in Suspense
+function QuizResultContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -316,5 +317,21 @@ export default function QuizResultPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function QuizResultPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles["qr-shell"]}>
+        <div className={styles["qr-state-center"]}>
+          <div className={styles["qr-spinner"]} />
+          <p className={styles["qr-state-text"]}>Loading results…</p>
+        </div>
+      </div>
+    }>
+      <QuizResultContent />
+    </Suspense>
   );
 }

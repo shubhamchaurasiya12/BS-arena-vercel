@@ -527,6 +527,9 @@ export async function recalculateGroupStats(groupId: string) {
       .eq("id", member.user_id)
       .single();
 
+    // Add null check for user
+    if (!user) continue;
+
     const lp =
       user.total_points /
       Math.max(user.active_subject_count, 1);

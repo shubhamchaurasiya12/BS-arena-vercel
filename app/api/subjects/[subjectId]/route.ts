@@ -5,9 +5,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { supabase } from "@/lib/supabase";
 
+/* =====================================================
+   POST — Remove subject (form submission redirect)
+===================================================== */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { subjectId?: string } }
+  context: { params: Promise<{ subjectId: string }> }
 ) {
   // 🔐 Auth
   const session = await getServerSession(authOptions);
@@ -16,8 +19,8 @@ export async function POST(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
+  const { subjectId } = await context.params;
   const userId = session.user.id;
-  const subjectId = params.subjectId;
 
   if (!subjectId) {
     return NextResponse.json(
@@ -49,8 +52,11 @@ export async function POST(
   return NextResponse.redirect(new URL("/dashboard", req.url));
 }
 
+/* =====================================================
+   DELETE — API removal (JSON response)
+===================================================== */
 export async function DELETE(
-  request: Request,
+  req: NextRequest,
   context: { params: Promise<{ subjectId: string }> }
 ) {
   try {
@@ -79,10 +85,7 @@ export async function DELETE(
       .eq("user_id", userId)
       .eq("subject_id", subjectId);
 
-    if (deleteError) {
-      console.error("Delete error:", deleteError);
-      throw deleteError;
-    }
+    if (deleteError) throw deleteError;
 
     /* =========================
        2️⃣ Recalculate count
@@ -92,10 +95,7 @@ export async function DELETE(
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId);
 
-    if (countError) {
-      console.error("Count error:", countError);
-      throw countError;
-    }
+    if (countError) throw countError;
 
     /* =========================
        3️⃣ Update users table
@@ -105,10 +105,7 @@ export async function DELETE(
       .update({ active_subject_count: count ?? 0 })
       .eq("id", userId);
 
-    if (updateError) {
-      console.error("Update error:", updateError);
-      throw updateError;
-    }
+    if (updateError) throw updateError;
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -1,7 +1,7 @@
 // D:\BS-arena-NextJS\app\quiz\play\page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import MathText from "@/components/MathText";
@@ -13,7 +13,8 @@ type QuizQuestion = {
   options: string[];
 };
 
-export default function QuizPlayPage() {
+// Main component that uses useSearchParams - wrapped in Suspense
+function QuizPlayContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token } = useAuth();
@@ -220,5 +221,21 @@ export default function QuizPlayPage() {
 
       </div>
     </div>
+  );
+}
+
+// Main page component with Suspense boundary
+export default function QuizPlayPage() {
+  return (
+    <Suspense fallback={
+      <div className={s.shell}>
+        <div className={s.stateCenter}>
+          <div className={s.spinner} />
+          <p className={s.stateText}>Loading quiz…</p>
+        </div>
+      </div>
+    }>
+      <QuizPlayContent />
+    </Suspense>
   );
 }

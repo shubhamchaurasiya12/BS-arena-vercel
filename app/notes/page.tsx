@@ -17,6 +17,7 @@ type Note = {
   published: boolean;
 };
 
+// Main component that uses useSearchParams - wrapped in Suspense
 function NotesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -285,6 +286,7 @@ function NotesContent() {
   );
 }
 
+// Main page component with Suspense boundary
 export default function NotesPage() {
   return (
     <Suspense

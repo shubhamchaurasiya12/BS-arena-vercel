@@ -58,7 +58,7 @@ function cleanContent(text: string): string {
  */
 function parseMarkdownWithMath(text: string): string {
   // Store math expressions to protect them during markdown processing
-  const mathExpressions: any[] = [];
+  const mathExpressions: Array<{ content: string; display: boolean }> = [];
   let processed = text;
 
   // Extract display math ($$...$$)
@@ -135,6 +135,8 @@ function processLineBreaksAndParagraphs(text: string): string {
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (!line) continue;
+    
     const trimmedLine = line.trim();
     
     // Check if line is a block element (heading, list, table, hr, etc.)
@@ -186,15 +188,29 @@ function processLists(text: string): string {
 
   while (i < lines.length) {
     const line = lines[i];
+    if (!line) {
+      i++;
+      continue;
+    }
     
     // Check if line is a list item (starts with * or number.)
     if (line.match(/^(\s*)\* (.+)$/) || line.match(/^(\s*)\d+\. (.+)$/)) {
       const listLines: string[] = [];
       
       // Collect all consecutive list lines (including nested)
-      while (i < lines.length && (lines[i].match(/^(\s*)\* (.+)$/) || lines[i].match(/^(\s*)\d+\. (.+)$/))) {
-        listLines.push(lines[i]);
-        i++;
+      while (i < lines.length) {
+        const currentLine = lines[i];
+        if (!currentLine) break;
+
+        if (
+          currentLine.match(/^(\s*)\* (.+)$/) ||
+          currentLine.match(/^(\s*)\d+\. (.+)$/)
+        ) {
+          listLines.push(currentLine);
+          i++;
+        } else {
+          break;
+        }
       }
       
       result.push(convertListToHTML(listLines));
@@ -220,23 +236,36 @@ function convertListToHTML(listLines: string[]): string {
     const match = line.match(/^(\s*)(\*|\d+\.)\s+(.+)$/);
     if (!match) continue;
     
-    const indent = match[1].length;
-    const marker = match[2];
-    const content = match[3];
+    const indent = match[1]?.length ?? 0;
+    const marker = match[2] ?? '';
+    const content = match[3] ?? '';
     const listType = marker === '*' ? 'ul' : 'ol';
     
     // Close lists that are deeper than current indent
-    while (stack.length > 0 && stack[stack.length - 1].indent >= indent) {
-      const last = stack.pop();
-      html += `</${last?.type}>`;
+    while (stack.length > 0) {
+      const lastItem = stack[stack.length - 1];
+      if (lastItem && lastItem.indent >= indent) {
+        stack.pop();
+        html += `</${lastItem.type}>`;
+      } else {
+        break;
+      }
     }
     
     // Open new list if needed
-    if (stack.length === 0 || stack[stack.length - 1].indent < indent) {
+    if (stack.length === 0) {
       const listClass = listType === 'ul' ? 'list-disc' : 'list-decimal';
-      const marginClass = stack.length === 0 ? 'my-2' : 'my-0.5';
+      const marginClass = 'my-2';
       html += `<${listType} class="${listClass} ${marginClass} space-y-0.5 ml-6">`;
       stack.push({ indent, type: listType });
+    } else {
+      const lastItem = stack[stack.length - 1];
+      if (lastItem && lastItem.indent < indent) {
+        const listClass = listType === 'ul' ? 'list-disc' : 'list-decimal';
+        const marginClass = 'my-0.5';
+        html += `<${listType} class="${listClass} ${marginClass} space-y-0.5 ml-6">`;
+        stack.push({ indent, type: listType });
+      }
     }
     
     // Add list item - ADD ITALIC CLASS
@@ -245,8 +274,10 @@ function convertListToHTML(listLines: string[]): string {
   
   // Close remaining lists
   while (stack.length > 0) {
-    const last = stack.pop();
-    html += `</${last?.type}>`;
+    const lastItem = stack.pop();
+    if (lastItem) {
+      html += `</${lastItem.type}>`;
+    }
   }
   
   return html;
@@ -262,15 +293,26 @@ function parseMarkdownTables(text: string): string {
 
   while (i < lines.length) {
     const line = lines[i];
+    if (!line) {
+      i++;
+      continue;
+    }
     
     // Check if this line starts a table
     if (line.trim().startsWith('|')) {
       const tableLines: string[] = [];
       
       // Collect all consecutive table lines
-      while (i < lines.length && lines[i].trim().startsWith('|')) {
-        tableLines.push(lines[i]);
-        i++;
+      while (i < lines.length) {
+        const currentLine = lines[i];
+        if (!currentLine) break;
+        
+        if (currentLine.trim().startsWith('|')) {
+          tableLines.push(currentLine);
+          i++;
+        } else {
+          break;
+        }
       }
       
       if (tableLines.length >= 2) {
@@ -293,6 +335,7 @@ function parseMarkdownTables(text: string): string {
  */
 function convertMarkdownTableToHTML(tableLines: string[]): string {
   if (tableLines.length < 2) return tableLines.join('\n');
+  if (!tableLines[0] || !tableLines[1]) return tableLines.join('\n');
 
   let html = '<table class="min-w-full my-3 border-collapse border border-gray-300 rounded-lg overflow-hidden shadow-sm"><thead class="bg-gray-100"><tr>';
   
@@ -309,7 +352,10 @@ function convertMarkdownTableToHTML(tableLines: string[]): string {
   
   // Body rows - ADD ITALIC TO TABLE CELLS
   for (let i = 2; i < tableLines.length; i++) {
-    const cells = tableLines[i]
+    const currentLine = tableLines[i];
+    if (!currentLine) continue;
+    
+    const cells = currentLine
       .split('|')
       .map(cell => cell.trim())
       .filter(cell => cell.length > 0);
@@ -393,5 +439,5 @@ function escapeHtml(text: string): string {
     '"': '&quot;',
     "'": '&#039;'
   };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
+  return text.replace(/[&<>"']/g, (m) => map[m] || m);
 }
