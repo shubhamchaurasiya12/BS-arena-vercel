@@ -8,6 +8,7 @@ type User = {
   id: string;
   name: string;
   email: string;
+  role: string;
   total_points: number;
   active_subject_count: number;
 };
