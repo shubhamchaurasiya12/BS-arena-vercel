@@ -24,7 +24,7 @@ type DashboardData = {
   };
   subjects?: {
     subject_id: string;
-    subjects: { name: string }[] | null;
+    subjects: { name: string } | null;
   }[];
   group?: {
     id: string;
@@ -50,10 +50,19 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  const { data: subjects } = await supabase
+  const { data: rawSubjects } = await supabase
     .from("user_subjects")
     .select("subject_id, subjects(name)")
     .eq("user_id", user.id);
+
+  // Normalize Supabase relation result
+  const subjects =
+    rawSubjects?.map((s: any) => ({
+      subject_id: s.subject_id,
+      subjects: Array.isArray(s.subjects)
+        ? s.subjects[0] ?? null
+        : s.subjects ?? null,
+    })) ?? [];
 
   /* ===============================
      FETCH GROUP DATA
@@ -100,7 +109,7 @@ export default async function DashboardPage() {
 
   const data: DashboardData = {
     user,
-    subjects: subjects || [],
+    subjects,
     group: groupData,
   };
 
@@ -126,18 +135,12 @@ export default async function DashboardPage() {
           <div className="page-header-actions">
             <Link href="/groups">
               <button className="btn btn--primary">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
                 WhatsApp Community
               </button>
             </Link>
 
             <Link href="/rate-app">
               <button className="btn btn--ghost">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                </svg>
                 Rate App
               </button>
             </Link>
@@ -181,8 +184,8 @@ export default async function DashboardPage() {
                   <div>
                     <p className="info-label">Subjects</p>
                     <p className="info-value" style={{ fontSize: '13px' }}>
-                      {data.subjects && data.subjects.length > 0
-                        ? data.subjects.map((s) => s.subjects?.[0]?.name ?? "").filter(Boolean).join(", ")
+                      {subjects.length > 0
+                        ? subjects.map((s) => s.subjects?.name ?? "").filter(Boolean).join(", ")
                         : "None added yet"}
                     </p>
                   </div>
@@ -244,54 +247,72 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {/* ===== SUBJECTS GRID ===== */}
+            {/* ===== SUBJECT GRID ===== */}
             <div className="card anim-4">
               <div className="subjects-header">
                 <div className="card-title" style={{ marginBottom: 0 }}>
                   <span className="card-title-pip" />
                   Selected Subjects
                 </div>
+
                 <span className="subjects-count">
-                  {data.subjects?.length || 0} of 4
+                  {subjects.length} of 4
                 </span>
               </div>
 
               <div style={{ marginTop: '20px' }}>
                 <div className="subject-grid">
-                  {data.subjects?.slice(0, 4).map((s, idx) => (
+
+                  {subjects.slice(0, 4).map((s, idx) => (
                     <div key={s.subject_id} className="subject-tile-wrap">
                       <a
                         href={`/notes?subjectId=${s.subject_id}`}
                         className="subject-tile"
                       >
                         <span className="subject-tile__num">{idx + 1}</span>
-                        <p className="subject-tile__name">{s.subjects?.[0]?.name ?? "Unknown"}</p>
-                        <p className="subject-tile__cta">View notes →</p>
+
+                        <p className="subject-tile__name">
+                          {s.subjects?.name ?? "Unknown"}
+                        </p>
+
+                        <p className="subject-tile__cta">
+                          View notes →
+                        </p>
                       </a>
+
                       <div className="subject-tile-delete">
                         <DeleteSubjectButton subjectId={s.subject_id} />
                       </div>
                     </div>
                   ))}
 
-                  {Array.from({ length: Math.max(0, 4 - (data.subjects?.length || 0)) }).map((_, i) => (
+                  {Array.from({ length: Math.max(0, 4 - subjects.length) }).map((_, i) => (
                     <a key={i} href="/subject-selection" className="subject-tile--add">
                       <div className="subject-tile--add__icon">
                         <FaPlus />
                       </div>
-                      <span className="subject-tile--add__label">Add Subject</span>
-                      <span className="subject-tile--add__sublabel">Click to explore</span>
+
+                      <span className="subject-tile--add__label">
+                        Add Subject
+                      </span>
+
+                      <span className="subject-tile--add__sublabel">
+                        Click to explore
+                      </span>
                     </a>
                   ))}
+
                 </div>
               </div>
             </div>
+
           </div>
 
           {/* ================= RIGHT SIDE ================= */}
           <div className="dashboard-right anim-5">
             <VideoTools />
           </div>
+
         </div>
       </div>
 
