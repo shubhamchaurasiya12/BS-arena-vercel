@@ -18,12 +18,13 @@ type DashboardData = {
     id: string;
     name: string;
     email: string;
+    role: string;
     total_points: number;
     active_subject_count: number;
   };
   subjects?: {
     subject_id: string;
-    subjects: { name: string }[];
+    subjects: { name: string }[] | null;
   }[];
   group?: {
     id: string;
@@ -43,7 +44,7 @@ export default async function DashboardPage() {
 
   const { data: user } = await supabase
     .from("users")
-    .select("id, name, email, total_points, active_subject_count")
+    .select("id, name, email, role, total_points, active_subject_count")
     .eq("email", session.user.email)
     .maybeSingle();
 
@@ -115,8 +116,7 @@ export default async function DashboardPage() {
           <div>
             <p className="page-label">Dashboard</p>
             <h1 className="page-heading">
-              Welcome back,{" "}
-              <em>{data.user?.name || "Student"}</em>
+              Welcome back, <em>{data.user?.name || "Student"}</em>
             </h1>
             <p className="page-subheading">
               Track your progress and manage your subjects
@@ -132,6 +132,7 @@ export default async function DashboardPage() {
                 WhatsApp Community
               </button>
             </Link>
+
             <Link href="/rate-app">
               <button className="btn btn--ghost">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -160,7 +161,6 @@ export default async function DashboardPage() {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
-                  {/* Avatar uses global .avatar + .avatar--lg */}
                   <div className="avatar avatar--lg">
                     {data.user?.name?.[0] || "S"}
                   </div>
@@ -265,7 +265,7 @@ export default async function DashboardPage() {
                         className="subject-tile"
                       >
                         <span className="subject-tile__num">{idx + 1}</span>
-                        <p className="subject-tile__name">{s.subjects?.name ?? "Unknown"}</p>
+                        <p className="subject-tile__name">{s.subjects?.[0]?.name ?? "Unknown"}</p>
                         <p className="subject-tile__cta">View notes →</p>
                       </a>
                       <div className="subject-tile-delete">
