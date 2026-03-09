@@ -265,7 +265,7 @@ export default async function DashboardPage() {
                         className="subject-tile"
                       >
                         <span className="subject-tile__num">{idx + 1}</span>
-                        <p className="subject-tile__name">{s.subjects?.[0]?.name ?? "Unknown"}</p>
+                        <p className="subject-tile__name">{s.subjects?.name ?? "Unknown"}</p>
                         <p className="subject-tile__cta">View notes →</p>
                       </a>
                       <div className="subject-tile-delete">
